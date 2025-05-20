@@ -8,10 +8,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * Controlador de la vista de gestión de usuarios. Permite listar todos los
+ * usuarios, crear nuevos, editar existentes y eliminar los seleccionados.
+ */
 public class UsuarioController {
 
     @FXML private TableView<Usuario>           tablaUsuarios;
@@ -21,17 +27,23 @@ public class UsuarioController {
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
+    /**
+     * Inicializa las columnas de la tabla vinculando cada columna
+     * con la propiedad correspondiente del modelo Usuario. A continuación
+     * carga la lista inicial de usuarios.
+     */
     @FXML
     public void initialize() {
-        // Configura los cellValueFactory
         colId.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getIdUsuario()));
         colNombre.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getNombre()));
         colCorreo.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getCorreo()));
-
-        // Carga datos iniciales
         loadUsuarios();
     }
 
+    /**
+     * Obtiene todos los usuarios desde la capa DAO y los asigna a la tabla.
+     * Si ocurre un error de acceso a datos, muestra un cuadro de diálogo de error.
+     */
     private void loadUsuarios() {
         try {
             var list = usuarioDAO.findAll();
@@ -41,35 +53,28 @@ public class UsuarioController {
         }
     }
 
-
+    /**
+     * Abre un formulario modal para dar de alta un nuevo usuario. Se crea
+     * un objeto Usuario vacío y se pasa al UsuarioFormController. Tras cerrar
+     * el diálogo, si el usuario confirmó la operación, se recarga la tabla.
+     */
     @FXML
     private void onNuevoUsuario() {
         try {
-            // 1) preparamos un nuevo Usuario vacío
             Usuario temp = new Usuario();
-
-            // 2) cargamos el FXML del formulario
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/agrobdgui/usuarioform.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/agrobdgui/usuarioform.fxml"));
             Parent root = loader.load();
-
-            // 3) creamos la ventana modal
             Stage dialog = new Stage();
             dialog.setTitle("Nuevo Usuario");
             dialog.initOwner(tablaUsuarios.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setScene(new Scene(root));
 
-            // 4) pasamos el Stage y el Usuario al formulario
             UsuarioFormController fc = loader.getController();
             fc.setDialogStage(dialog);
             fc.setUsuario(temp);
 
-            // 5) mostramos y esperamos
             dialog.showAndWait();
-
-            // 6) si guardó (okClicked), recargamos tabla
             if (fc.isOkClicked()) {
                 loadUsuarios();
             }
@@ -78,8 +83,10 @@ public class UsuarioController {
         }
     }
 
-
-
+    /**
+     * Elimina el usuario seleccionado en la tabla. Si no hay ninguno seleccionado
+     * muestra un error. Tras eliminar con éxito, recarga la lista de usuarios.
+     */
     @FXML
     private void onEliminarUsuario() {
         Usuario sel = tablaUsuarios.getSelectionModel().getSelectedItem();
@@ -95,6 +102,11 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Abre un formulario modal para editar el usuario seleccionado. Si no hay
+     * selección, muestra un mensaje de error. Al confirmar los cambios, recarga
+     * la tabla de usuarios.
+     */
     @FXML
     private void onEditarUsuario() {
         Usuario sel = tablaUsuarios.getSelectionModel().getSelectedItem();
@@ -103,9 +115,7 @@ public class UsuarioController {
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/agrobdgui/usuarioform.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/agrobdgui/usuarioform.fxml"));
             Parent root = loader.load();
             Stage dialog = new Stage();
             dialog.setTitle("Editar Usuario");
@@ -115,7 +125,6 @@ public class UsuarioController {
 
             UsuarioFormController fc = loader.getController();
             fc.setDialogStage(dialog);
-            // PASAMOS EL USUARIO EXISTENTE
             fc.setUsuario(sel);
 
             dialog.showAndWait();
@@ -127,6 +136,12 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Muestra un cuadro de diálogo de alerta de tipo ERROR con el título y
+     * mensaje especificados.
+     * @param title texto que aparece en la cabecera del diálogo
+     * @param msg   mensaje de contenido con detalles del error
+     */
     private void showError(String title, String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -135,4 +150,5 @@ public class UsuarioController {
         alert.showAndWait();
     }
 }
+
 

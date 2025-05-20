@@ -18,19 +18,22 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Controlador del formulario de creación, edición y visualización de pedidos.
+ * Gestiona la selección de fecha, comentario y líneas de detalle de maquinaria,
+ * así como la persistencia del pedido y sus detalles en la base de datos.
+ */
 public class PedidoFormController {
 
     @FXML private DatePicker dpFecha;
     @FXML private TextArea  taComentario;
-
     @FXML private ComboBox<Maquinaria> cbMaquinaria;
     @FXML private Spinner<Integer>     spCantidad;
-
     @FXML private Button btnAgregarLinea;
     @FXML private Button btnEliminarLinea;
-
     @FXML private TableView<DetallePedido> tvLineas;
     @FXML private TableColumn<DetallePedido,String> colNombre;
     @FXML private TableColumn<DetallePedido,String> colTipo;
@@ -38,31 +41,31 @@ public class PedidoFormController {
     @FXML private TableColumn<DetallePedido,Integer> colCantidad;
     @FXML private TableColumn<DetallePedido,Double>  colPrecio;
     @FXML private TableColumn<DetallePedido,Double>  colSubtotal;
-
     @FXML private Label lblTotal;
-
     @FXML private Button btnGuardar;
     @FXML private Button btnCancelar;
 
-    private final PedidoDAO         pedidoDAO     = new PedidoDAO();
-    private final DetallePedidoDAO  detalleDAO    = new DetallePedidoDAO();
-    private final MaquinariaDAO     maquinariaDAO = new MaquinariaDAO();
+    private final PedidoDAO pedidoDAO     = new PedidoDAO();
+    private final DetallePedidoDAO detalleDAO    = new DetallePedidoDAO();
+    private final MaquinariaDAO maquinariaDAO = new MaquinariaDAO();
 
     private Stage dialogStage;
     private boolean okClicked = false;
     private final ObservableList<DetallePedido> lineas = FXCollections.observableArrayList();
 
+    /**
+     * Inicializa los controles del formulario tras cargar el FXML.
+     * Se establece la fecha por defecto, el valor inicial del spinner,
+     * la configuración de las columnas de la tabla de líneas y la carga
+     * del catálogo de maquinaria en el ComboBox.
+     */
     @FXML
     private void initialize() {
-        // 1) Fecha por defecto
         dpFecha.setValue(LocalDate.now());
-
-        // 2) Spinner cantidad
         spCantidad.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1)
         );
 
-        // 3) Configuración columnas
         colNombre.setCellValueFactory(cd -> {
             try {
                 Maquinaria m = maquinariaDAO.findById(cd.getValue().getIdMaquinaria());
@@ -71,7 +74,6 @@ public class PedidoFormController {
                 return new SimpleStringProperty("");
             }
         });
-
         colTipo.setCellValueFactory(cd -> {
             try {
                 Maquinaria m = maquinariaDAO.findById(cd.getValue().getIdMaquinaria());
@@ -80,7 +82,6 @@ public class PedidoFormController {
                 return new SimpleStringProperty("");
             }
         });
-
         colDescripcion.setCellValueFactory(cd -> {
             try {
                 Maquinaria m = maquinariaDAO.findById(cd.getValue().getIdMaquinaria());
@@ -89,33 +90,26 @@ public class PedidoFormController {
                 return new SimpleStringProperty("");
             }
         });
-
         colCantidad.setCellValueFactory(cd ->
                 new SimpleIntegerProperty(cd.getValue().getCantidad()).asObject()
         );
 
-        // P.Unitario (€)
         colPrecio.setCellFactory(tc -> new TableCell<>() {
             @Override
             protected void updateItem(Double precio, boolean empty) {
                 super.updateItem(precio, empty);
-                setText(empty || precio == null
-                        ? null
-                        : String.format("%.2f €", precio));
+                setText(empty || precio == null ? null : String.format("%.2f €", precio));
             }
         });
         colPrecio.setCellValueFactory(cd ->
                 new SimpleDoubleProperty(cd.getValue().getPrecioUnitario()).asObject()
         );
 
-        // Subtotal (€)
         colSubtotal.setCellFactory(tc -> new TableCell<>() {
             @Override
             protected void updateItem(Double sub, boolean empty) {
                 super.updateItem(sub, empty);
-                setText(empty || sub == null
-                        ? null
-                        : String.format("%.2f €", sub));
+                setText(empty || sub == null ? null : String.format("%.2f €", sub));
             }
         });
         colSubtotal.setCellValueFactory(cd -> {
@@ -125,7 +119,6 @@ public class PedidoFormController {
 
         tvLineas.setItems(lineas);
 
-        // 4) Carga catálogo de maquinaria
         try {
             cbMaquinaria.setItems(
                     FXCollections.observableArrayList(maquinariaDAO.findAll())
@@ -134,31 +127,44 @@ public class PedidoFormController {
             e.printStackTrace();
         }
 
-        // 5) Total inicial
         actualizarTotal();
     }
 
+    /**
+     * Asigna el Stage modal que contiene este formulario,
+     * necesario para asociar alertas de error o confirmación.
+     * @param stage ventana modal padre
+     */
     public void setDialogStage(Stage stage) {
         this.dialogStage = stage;
     }
+
+    /**
+     * Indica si el usuario ha confirmado el formulario pulsando "Guardar"
+     * y los datos se han persistido correctamente.
+     * @return true si el formulario se guardó con éxito
+     */
     public boolean isOkClicked() {
         return okClicked;
     }
 
+    /**
+     * Añade o incrementa una línea de pedido según la maquinaria
+     * y cantidad seleccionadas. Si la misma maquinaria ya existe
+     * en la lista, suma la cantidad; de lo contrario crea una nueva línea.
+     * Actualiza el total tras la operación.
+     */
     @FXML
     private void onAgregarLinea() {
         Maquinaria m = cbMaquinaria.getValue();
         int qty = spCantidad.getValue();
         if (m == null || qty <= 0) return;
 
-        // Si ya hay línea, acumular
-        DetallePedido existente = null;
-        for (DetallePedido dp : lineas) {
-            if (dp.getIdMaquinaria() == m.getIdMaquinaria()) {
-                existente = dp;
-                break;
-            }
-        }
+        DetallePedido existente = lineas.stream()
+                .filter(dp -> dp.getIdMaquinaria() == m.getIdMaquinaria())
+                .findFirst()
+                .orElse(null);
+
         if (existente != null) {
             existente.setCantidad(existente.getCantidad() + qty);
             tvLineas.refresh();
@@ -173,6 +179,10 @@ public class PedidoFormController {
         actualizarTotal();
     }
 
+    /**
+     * Elimina la línea de detalle de pedido seleccionada en la tabla
+     * y recalcula el total. Si no hay selección no realiza ninguna acción.
+     */
     @FXML
     private void onEliminarLinea() {
         DetallePedido sel = tvLineas.getSelectionModel().getSelectedItem();
@@ -182,6 +192,13 @@ public class PedidoFormController {
         }
     }
 
+    /**
+     * Persiste el pedido con sus detalles en la base de datos.
+     * Se crea un nuevo objeto Pedido con el cliente en sesión, fecha,
+     * estado PENDIENTE y comentario, y a continuación cada DetallePedido.
+     * Si la operación es correcta marca okClicked y cierra el diálogo;
+     * en caso contrario muestra una alerta de error.
+     */
     @FXML
     private void onGuardar() {
         try {
@@ -206,18 +223,21 @@ public class PedidoFormController {
         }
     }
 
+    /**
+     * Cancela la operación y cierra el diálogo sin persistir cambios.
+     */
     @FXML
     private void onCancelar() {
         dialogStage.close();
     }
 
     /**
-     * Carga un pedido en modo SOLO LECTURA:
-     * - rellena fecha/comentario/líneas
-     * - deshabilita **todos** los controles de edición
+     * Configura el formulario en modo sólo lectura para mostrar
+     * un pedido existente. Rellena fecha, comentario y líneas,
+     * deshabilita todos los controles de edición y recalcula el total.
+     * @param pedido pedido a visualizar en modo sólo lectura
      */
     public void setReadOnly(Pedido pedido) {
-        // 1) Rellenar datos
         dpFecha.setValue(pedido.getFechaPedido());
         taComentario.setText(pedido.getComentario());
 
@@ -230,10 +250,8 @@ public class PedidoFormController {
             e.printStackTrace();
         }
 
-        // 2) recalcular total
         actualizarTotal();
 
-        // 3) deshabilitar todo
         dpFecha.setDisable(true);
         taComentario.setDisable(true);
         cbMaquinaria.setDisable(true);
@@ -244,7 +262,10 @@ public class PedidoFormController {
         btnCancelar.setDisable(true);
     }
 
-    /** Recalcula y muestra el total con “€” */
+    /**
+     * Recalcula la suma de todos los subtotales de las líneas
+     * y actualiza la etiqueta lblTotal con el valor formateado en euros.
+     */
     private void actualizarTotal() {
         double suma = 0;
         for (DetallePedido dp : lineas) {
@@ -253,6 +274,7 @@ public class PedidoFormController {
         lblTotal.setText(String.format("Total: %.2f €", suma));
     }
 }
+
 
 
 

@@ -1,7 +1,7 @@
 package com.miempresa.agroventas.baseDatos;
 
 /**
- * Simple POJO que almacena los parámetros de conexión.
+ * Classe Simple que almacena los parámetros de conexión.
  */
 public class ConnectionProperties {
     private final String server;

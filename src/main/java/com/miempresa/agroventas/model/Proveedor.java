@@ -8,8 +8,7 @@ public class Proveedor {
 
     public Proveedor() { }
 
-    public Proveedor(int idProveedor, String nombre,
-                     String telefono, String email) {
+    public Proveedor(int idProveedor, String nombre, String telefono, String email) {
         this.idProveedor = idProveedor;
         this.nombre      = nombre;
         this.telefono    = telefono;

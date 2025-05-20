@@ -17,14 +17,18 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-// IMPORTS de tus form-controllers
-import com.miempresa.agroventas.controller.UsuarioFormController;
-import com.miempresa.agroventas.controller.ClienteFormController;
-import com.miempresa.agroventas.controller.EmpleadoFormController;
-
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 
+/**
+ * Controlador de la ventana de Login / Registro.
+ * Gestiona:
+ *
+ *   Validación de credenciales y rol (Cliente o Empleado).
+ *   Registro de nuevos Usuarios y asignación de roles.
+ *   Apertura de formularios modales para Usuario, Cliente o Empleado
+ *   nicio de sesión y lanzamiento de la vista principal tras éxito.
+ *
+ */
 public class LoginController {
 
     @FXML private TextField     tfCorreo;
@@ -39,6 +43,10 @@ public class LoginController {
     private final ClienteDAO  clienteDAO   = new ClienteDAO();
     private final EmpleadoDAO empleadoDAO  = new EmpleadoDAO();
 
+    /**
+     * Inicializa el ToggleGroup de roles y selecciona Cliente por defecto.
+     * Se ejecuta automáticamente tras cargar el FXML.
+     */
     @FXML
     public void initialize() {
         roleGroup = new ToggleGroup();
@@ -47,6 +55,16 @@ public class LoginController {
         rbCliente.setSelected(true);
     }
 
+    /**
+     * Maneja el evento de inicio de sesión:
+     *
+     *   Valida que correo y contraseña no estén vacíos.
+     *   Comprueba credenciales contra la tabla Usuario.
+     *   Verifica si el Usuario tiene asociado el rol seleccionado (Cliente/Empleado).
+     *   Si es correcto, guarda la sesión y abre la vista principal.
+     *   En caso de error o coincidencia fallida, muestra mensaje en lblError.
+     *
+     */
     @FXML
     private void onLogin() {
         lblError.setText("");
@@ -88,11 +106,10 @@ public class LoginController {
             return;
         }
 
-        // Login OK
+        // Login exitoso: guardar sesión y abrir MainView
         Role role = wantCliente ? Role.CLIENTE : Role.EMPLEADO;
         Session.login(u, role);
 
-        // Cerrar login y abrir vista principal
         Stage st = (Stage) tfCorreo.getScene().getWindow();
         st.close();
         try {
@@ -102,6 +119,17 @@ public class LoginController {
         }
     }
 
+    /**
+     * Maneja el evento de registro de usuario:
+     *
+     *   Valida que correo y contraseña no estén vacíos.
+     *   Busca o crea un registro en Usuario (ignorando duplicados).
+     *   Verifica si ya tiene el rol elegido.
+     *   Abre el formulario de Cliente o Empleado para completar datos.
+     *   Guarda el nuevo Cliente/Empleado (ignorando duplicados) y hace login.
+     *   Muestra mensajes de error en lblError en caso de fallo.
+     *
+     */
     @FXML
     private void onRegister() {
         lblError.setText("");
@@ -115,11 +143,10 @@ public class LoginController {
         }
 
         try {
-            // 1) Buscamos al usuario por correo (o null si no existe)
+            // 1) Buscar usuario existente o preparar uno nuevo
             Usuario u = usuarioDAO.findByEmail(correo);
-
             if (u == null) {
-                // ——— Usuario NUEVO ———
+                // Formulario modal para crear Usuario (correo + contraseña)
                 FXMLLoader ufLoader = new FXMLLoader(
                         getClass().getResource("/agrobdgui/usuarioform.fxml")
                 );
@@ -130,7 +157,6 @@ public class LoginController {
                 UsuarioFormController ufc = ufLoader.getController();
                 ufc.setDialogStage(ux);
 
-                // Le pasamos correo/contra para que los muestre
                 Usuario nuevo = new Usuario();
                 nuevo.setCorreo(correo);
                 nuevo.setContrasena(pwd);
@@ -143,11 +169,10 @@ public class LoginController {
                     lblError.setText("Registro de usuario cancelado.");
                     return;
                 }
-                // Recuperamos el usuario ya rellenado en el form
                 u = ufc.getUsuario();
             }
 
-            // 2) Guardamos o actualizamos el usuario en BD, ignorando duplicados
+            // 2) Guardar o actualizar Usuario (ignorar duplicados)
             try {
                 if (u.getIdUsuario() == 0) {
                     usuarioDAO.create(u);
@@ -155,14 +180,12 @@ public class LoginController {
                     usuarioDAO.update(u);
                 }
             } catch (SQLException sqlEx) {
-                // Si es un duplicado de clave única, lo ignoramos
-                String msg = sqlEx.getSQLState() + " " + sqlEx.getMessage();
-                if (!msg.toLowerCase().contains("duplicate")) {
+                if (!sqlEx.getMessage().toLowerCase().contains("duplicate")) {
                     throw sqlEx;
                 }
             }
 
-            // 3) Comprobamos si ya tiene el rol
+            // 3) Verificar rol ya existente
             boolean isCliente  = clienteDAO.findById(u.getIdUsuario())  != null;
             boolean isEmpleado = empleadoDAO.findById(u.getIdUsuario()) != null;
             if (wantCliente && isCliente) {
@@ -174,7 +197,7 @@ public class LoginController {
                 return;
             }
 
-            // 4) Abrimos sólo el form del rol faltante, y creamos ese registro ignorando duplicados
+            // 4) Abrir formulario de rol faltante y guardar (ignorar duplicates)
             if (wantCliente) {
                 Cliente c = new Cliente();
                 c.setIdUsuario(u.getIdUsuario());
@@ -195,12 +218,10 @@ public class LoginController {
                     lblError.setText("Registro de cliente cancelado.");
                     return;
                 }
-
                 try {
                     clienteDAO.create(c);
                 } catch (SQLException sqlEx) {
-                    String msg = sqlEx.getSQLState() + " " + sqlEx.getMessage();
-                    if (!msg.toLowerCase().contains("duplicate")) {
+                    if (!sqlEx.getMessage().toLowerCase().contains("duplicate")) {
                         throw sqlEx;
                     }
                 }
@@ -223,18 +244,16 @@ public class LoginController {
                     lblError.setText("Registro de empleado cancelado.");
                     return;
                 }
-
                 try {
                     empleadoDAO.create(e);
                 } catch (SQLException sqlEx) {
-                    String msg = sqlEx.getSQLState() + " " + sqlEx.getMessage();
-                    if (!msg.toLowerCase().contains("duplicate")) {
+                    if (!sqlEx.getMessage().toLowerCase().contains("duplicate")) {
                         throw sqlEx;
                     }
                 }
             }
 
-            // 5) ¡Login automático y cierro!
+            // 5) Login automático tras registro completo
             Role role = wantCliente ? Role.CLIENTE : Role.EMPLEADO;
             Session.login(u, role);
             Stage st = (Stage) tfCorreo.getScene().getWindow();
@@ -246,11 +265,12 @@ public class LoginController {
         }
     }
 
-
-
-    /** Abre el form de Cliente, lo guarda y hace login como CLIENTE */
+    /**
+     * Abre el formulario de Cliente, lo guarda y hace login como CLIENTE.
+     * Usado por flujos alternativos (no directamente desde FXML).
+     * @param u Usuario ya autenticado
+     */
     private void showClienteFormAndLogin(Usuario u) throws Exception {
-        // si ya tiene cliente registrado, salimos
         if (clienteDAO.findById(u.getIdUsuario()) != null) {
             lblError.setText("Ya tienes cuenta de cliente.");
             return;
@@ -258,12 +278,12 @@ public class LoginController {
         Cliente c = new Cliente();
         c.setIdUsuario(u.getIdUsuario());
 
-        Stage dialog = new Stage();
-        dialog.initOwner(tfCorreo.getScene().getWindow());
-        dialog.initModality(Modality.APPLICATION_MODAL);
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/agrobdgui/clienteform.fxml")
         );
+        Stage dialog = new Stage();
+        dialog.initOwner(tfCorreo.getScene().getWindow());
+        dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setScene(new Scene(loader.load()));
         dialog.setTitle("Registrar Cliente");
 
@@ -277,13 +297,16 @@ public class LoginController {
             return;
         }
 
-        // guardamos y hacemos login
         clienteDAO.create(c);
         Session.login(u, Role.CLIENTE);
         closeAndLaunchMain();
     }
 
-    /** Abre el form de Empleado, lo guarda y hace login como EMPLEADO */
+    /**
+     * Abre el formulario de Empleado, lo guarda y hace login como EMPLEADO.
+     * Usado por flujos alternativos (no directamente desde FXML).
+     * @param u Usuario ya autenticado
+     */
     private void showEmpleadoFormAndLogin(Usuario u) throws Exception {
         if (empleadoDAO.findById(u.getIdUsuario()) != null) {
             lblError.setText("Ya tienes cuenta de empleado.");
@@ -292,12 +315,12 @@ public class LoginController {
         Empleado e = new Empleado();
         e.setIdUsuario(u.getIdUsuario());
 
-        Stage dialog = new Stage();
-        dialog.initOwner(tfCorreo.getScene().getWindow());
-        dialog.initModality(Modality.APPLICATION_MODAL);
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/agrobdgui/empleadoform.fxml")
         );
+        Stage dialog = new Stage();
+        dialog.initOwner(tfCorreo.getScene().getWindow());
+        dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setScene(new Scene(loader.load()));
         dialog.setTitle("Registrar Empleado");
 
@@ -315,13 +338,17 @@ public class LoginController {
         closeAndLaunchMain();
     }
 
-    /** Cierra el login y muestra la vista principal */
+    /**
+     * Cierra la ventana de login y abre la vista principal de la aplicación.
+     * @throws Exception si falla la carga de la vista principal
+     */
     private void closeAndLaunchMain() throws Exception {
         Stage st = (Stage) tfCorreo.getScene().getWindow();
         st.close();
         MainApp.showMainView(new Stage());
     }
 }
+
 
 
 

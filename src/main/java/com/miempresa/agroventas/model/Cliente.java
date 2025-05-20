@@ -8,8 +8,7 @@ public class Cliente extends Usuario {
         super();  // llama al constructor vacío de Usuario
     }
 
-    public Cliente(int idUsuario, String nombre, String apellidos, String correo, String contrasena,
-                   String direccion, String telefono) {
+    public Cliente(int idUsuario, String nombre, String apellidos, String correo, String contrasena, String direccion, String telefono) {
         super(idUsuario, nombre, apellidos, correo, contrasena);
         this.direccion = direccion;
         this.telefono  = telefono;

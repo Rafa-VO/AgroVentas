@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 
 public class ClienteController {
 
-    @FXML private TableView<Cliente>tablaClientes;
+    @FXML private TableView<Cliente> tablaClientes;
     @FXML private TableColumn<Cliente,Integer> colId;
     @FXML private TableColumn<Cliente,String>  colNombre;
     @FXML private TableColumn<Cliente,String>  colCorreo;
@@ -24,6 +24,10 @@ public class ClienteController {
 
     private final ClienteDAO dao = new ClienteDAO();
 
+    /**
+     * Inicializa las columnas de la tabla y carga la lista de clientes.
+     * Este método se ejecuta automáticamente tras cargar el FXML.
+     */
     @FXML
     public void initialize() {
         colId       .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getIdUsuario()));
@@ -35,6 +39,10 @@ public class ClienteController {
         loadClientes();
     }
 
+    /**
+     * Recupera todos los clientes de la base de datos y los muestra en la tabla.
+     * Si ocurre un error, muestra un diálogo de error.
+     */
     private void loadClientes() {
         try {
             var list = dao.findAll();
@@ -44,9 +52,13 @@ public class ClienteController {
         }
     }
 
-    @FXML private TableView<Usuario> tablaUsuarios;  // tu lista de usuarios
+    @FXML private TableView<Usuario> tablaUsuarios;
     @FXML private Button      btnNuevoCliente;
 
+    /**
+     * Abre un diálogo para dar de alta un nuevo cliente.
+     * Al cerrar el formulario, si el usuario confirma, recarga la tabla.
+     */
     @FXML
     private void onNuevoCliente() {
         try {
@@ -61,9 +73,8 @@ public class ClienteController {
             dialog.setScene(new Scene(root));
 
             ClienteFormController fc = loader.getController();
-            // Nuevo Cliente vacío
             fc.setDialogStage(dialog);
-            fc.setCliente(new Cliente());
+            fc.setCliente(new Cliente());  // cliente vacío para crear uno nuevo
 
             dialog.showAndWait();
             if (fc.isOkClicked()) {
@@ -74,11 +85,18 @@ public class ClienteController {
         }
     }
 
-
+    /**
+     * Abre un diálogo para editar el cliente seleccionado.
+     * Si no hay ninguno seleccionado, muestra un error.
+     * Al confirmar cambios, recarga la tabla.
+     */
     @FXML
     private void onEditarCliente() {
         Cliente sel = tablaClientes.getSelectionModel().getSelectedItem();
-        if (sel == null) { showError("Selecciona un cliente",""); return; }
+        if (sel == null) {
+            showError("Selecciona un cliente", "");
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/agrobdgui/clienteform.fxml")
@@ -92,16 +110,22 @@ public class ClienteController {
 
             ClienteFormController fc = loader.getController();
             fc.setDialogStage(dialog);
-            fc.setCliente(sel);   // pasamos el Cliente existente
+            fc.setCliente(sel);   // pasamos el cliente existente para editar
 
             dialog.showAndWait();
-            if (fc.isOkClicked()) loadClientes();
+            if (fc.isOkClicked()) {
+                loadClientes();
+            }
         } catch (Exception e) {
             showError("Error al abrir formulario de edición", e.getMessage());
         }
     }
 
-
+    /**
+     * Método auxiliar que factoriza la lógica de abrir formularios de cliente.
+     * @param temp   instancia de Cliente (nueva o existente)
+     * @param titulo título de la ventana de diálogo
+     */
     private void abrirFormulario(Cliente temp, String titulo) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -119,16 +143,25 @@ public class ClienteController {
             fc.setCliente(temp);
 
             dialog.showAndWait();
-            if (fc.isOkClicked()) loadClientes();
+            if (fc.isOkClicked()) {
+                loadClientes();
+            }
         } catch(Exception e) {
             showError("Error al abrir formulario", e.getMessage());
         }
     }
 
+    /**
+     * Elimina el cliente seleccionado de la base de datos.
+     * Si no hay selección, muestra un error; ante cualquier excepción, informa al usuario.
+     */
     @FXML
     private void onEliminarCliente() {
         Cliente sel = tablaClientes.getSelectionModel().getSelectedItem();
-        if (sel==null) { showError("Selecciona un cliente",""); return; }
+        if (sel == null) {
+            showError("Selecciona un cliente", "");
+            return;
+        }
         try {
             dao.delete(sel.getIdUsuario());
             loadClientes();
@@ -137,10 +170,16 @@ public class ClienteController {
         }
     }
 
-    private void showError(String h, String c) {
-        Alert a = new Alert(Alert.AlertType.ERROR, c);
-        a.setHeaderText(h);
-        a.showAndWait();
+    /**
+     * Muestra un diálogo de alerta de tipo ERROR.
+     * @param header texto de cabecera de la alerta
+     * @param content texto de contenido (detalle del error)
+     */
+    private void showError(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, content);
+        alert.setHeaderText(header);
+        alert.showAndWait();
     }
 }
+
 

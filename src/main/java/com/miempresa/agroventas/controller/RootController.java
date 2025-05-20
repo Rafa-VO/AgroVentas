@@ -12,6 +12,10 @@ import javafx.scene.layout.BorderPane;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Controlador de la ventana raíz de la aplicación. Gestiona la visibilidad
+ * de los menús y carga las vistas correspondientes según el rol del usuario.
+ */
 public class RootController {
 
     @FXML private BorderPane contenidoPane;
@@ -20,28 +24,36 @@ public class RootController {
     @FXML private MenuItem menuClientes;
     @FXML private MenuItem menuEmpleados;
 
+    /**
+     * Inicializa los elementos de la interfaz tras cargar el FXML.
+     * Según el rol recuperado de la sesión, oculta o muestra los menús
+     * y carga la vista inicial apropiada en el panel central.
+     */
     @FXML
     public void initialize() {
         Role role = Session.getRole();
 
         if (role == Role.CLIENTE) {
-            // los clientes no ven el menú de gestión
+            // Oculta el menú de gestión para clientes
             menuGestion.setVisible(false);
-            // carga ClienteView en el centro
+            // Carga la vista de cliente en el panel central
             cargar("views/clienteView.fxml");
         } else {
-            // EMPLEADO
+            // Oculta la opción de usuarios (solo empleados con permisos)
             menuUsuarios.setVisible(false);
-            menuClientes .setOnAction(e -> cargar("agrobdgui/cliente.fxml"));
+            // Configura la acción para cargar la vista de clientes
+            menuClientes.setOnAction(e -> cargar("agrobdgui/cliente.fxml"));
+            // Configura la acción para cargar la vista de empleados
             menuEmpleados.setOnAction(e -> cargar("views/empleadoView.fxml"));
-            // vista inicial: EmpleadoView
+            // Carga la vista de empleado como inicial
             cargar("views/empleadoView.fxml");
         }
     }
 
     /**
-     * Carga un FXML desde el classpath y lo inyecta en el centro.
-     * @param ruta ejemplo "views/empleadoView.fxml" o "agrobdgui/cliente.fxml"
+     * Carga un archivo FXML desde el classpath y lo coloca en el centro
+     * del BorderPane. Si no se encuentra el recurso, escribe un error en stderr.
+     * @param ruta ruta relativa del recurso FXML, por ejemplo "views/empleadoView.fxml"
      */
     private void cargar(String ruta) {
         URL url = getClass().getClassLoader().getResource(ruta);
@@ -57,6 +69,7 @@ public class RootController {
         }
     }
 }
+
 
 
 

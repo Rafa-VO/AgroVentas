@@ -10,9 +10,7 @@ public class Validacion {
 
     public Validacion() {}
 
-    public Validacion(int idPedido, int idEmpleado,
-                      LocalDateTime fechaValidacion,
-                      String comentarioValidacion) {
+    public Validacion(int idPedido, int idEmpleado, LocalDateTime fechaValidacion, String comentarioValidacion) {
         this.idPedido            = idPedido;
         this.idEmpleado          = idEmpleado;
         this.fechaValidacion     = fechaValidacion;
