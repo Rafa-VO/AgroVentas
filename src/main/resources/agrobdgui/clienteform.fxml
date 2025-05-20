@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<?import javafx.scene.control.Button?>
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.miempresa.agroventas.controller.ClienteFormController"
+      spacing="10" style="-fx-padding:20;">
+
+    <Label text="Nuevo Cliente" style="-fx-font-size:16px;"/>
+
+    <!-- Selección de usuario existente -->
+    <Label text="Usuario:"/>
+    <ComboBox fx:id="cbUsuario" promptText="Selecciona un usuario"/>
+
+    <!-- Datos propios de Cliente -->
+    <TextField fx:id="tfDireccion" promptText="Dirección"/>
+    <TextField fx:id="tfTelefono"  promptText="Teléfono"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Guardar" onAction="#onGuardar"/>
+        <Button text="Cancelar" onAction="#onCancelar"/>
+    </HBox>
+</VBox>
+
+

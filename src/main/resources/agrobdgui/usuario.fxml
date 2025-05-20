@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.miempresa.agroventas.controller.UsuarioController">
+
+    <top>
+        <Label text="Usuarios" style="-fx-font-size: 20px; -fx-padding: 10;" />
+    </top>
+
+    <center>
+        <TableView fx:id="tablaUsuarios">
+            <columns>
+                <TableColumn fx:id="colId"     text="ID"     prefWidth="50"  />
+                <TableColumn fx:id="colNombre" text="Nombre" prefWidth="150" />
+                <TableColumn fx:id="colCorreo" text="Correo" prefWidth="200" />
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Button text="Nuevo"    onAction="#onNuevoUsuario"/>
+            <Button text="Editar"   onAction="#onEditarUsuario"/>
+            <Button text="Eliminar" onAction="#onEliminarUsuario"/>
+        </HBox>
+    </bottom>
+</BorderPane>
+

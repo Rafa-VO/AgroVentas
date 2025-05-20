@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/23.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.miempresa.agroventas.controller.PedidoStateController"
+      spacing="10" style="-fx-padding:20;">
+
+    <HBox spacing="10">
+        <Label text="Pedido ID:"/>
+        <Label fx:id="lblId"/>
+        <Label text="Fecha:"/>
+        <Label fx:id="lblFecha"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Estado:"/>
+        <!-- ComboBox parametrizado con el enum -->
+        <ComboBox fx:id="cbEstado" prefWidth="200"/>
+    </HBox>
+
+    <Label text="Comentario de validación:"/>
+    <TextArea fx:id="taComentario" prefRowCount="4"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="btnCancelar" text="Cancelar" onAction="#onCancelar"/>
+        <Button fx:id="btnGuardar"   text="Guardar"  onAction="#onGuardar"/>
+    </HBox>
+</VBox>
+

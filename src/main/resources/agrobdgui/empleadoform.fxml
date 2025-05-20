@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.miempresa.agroventas.controller.EmpleadoFormController"
+      spacing="10" style="-fx-padding: 20px;">
+
+    <Label text="Empleado" style="-fx-font-size: 16px;"/>
+
+    <ComboBox fx:id="cbUsuario" promptText="Usuario"/>
+
+    <TextField fx:id="tfDepartamento" promptText="Departamento"/>
+    <TextField fx:id="tfCargo"        promptText="Cargo"/>
+    <TextField fx:id="tfSalario"      promptText="Salario"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Guardar" onAction="#onGuardar"/>
+        <Button text="Cancelar" onAction="#onCancelar"/>
+    </HBox>
+</VBox>
+
+
+

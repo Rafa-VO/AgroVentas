@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.miempresa.agroventas.controller.RootController"
+            fx:id="contenidoPane">
+
+    <top>
+        <MenuBar>
+            <!-- Le damos un fx:id al menú completo -->
+            <Menu fx:id="menuGestion" text="Gestión">
+                <items>
+                    <MenuItem fx:id="menuUsuarios"  text="Usuarios"   />
+                    <MenuItem fx:id="menuClientes"  text="Clientes"   />
+                    <MenuItem fx:id="menuEmpleados" text="Empleados"  />
+                </items>
+            </Menu>
+        </MenuBar>
+    </top>
+
+    <!-- en tiempo de ejecución inyectaremos aquí la vista hija -->
+    <center>
+        <!-- nada -->
+    </center>
+
+</BorderPane>
+
+
+
+

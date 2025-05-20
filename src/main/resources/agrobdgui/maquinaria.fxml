@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.miempresa.agroventas.controller.MaquinariaController"
+            style="-fx-padding:20;">
+
+    <top>
+        <Label text="Gestión de Maquinaria"
+               style="-fx-font-size:18px; -fx-padding:10;"/>
+    </top>
+
+    <center>
+        <TableView fx:id="tablaMaquinaria">
+            <columns>
+                <TableColumn fx:id="colId"          text="ID"          prefWidth="50"/>
+                <TableColumn fx:id="colNombre"      text="Nombre"      prefWidth="150"/>
+                <TableColumn fx:id="colDescripcion" text="Descripción" prefWidth="200"/>
+                <TableColumn fx:id="colTipo"        text="Tipo"        prefWidth="100"/>
+                <TableColumn fx:id="colPrecio"      text="Precio"      prefWidth="100"/>
+                <TableColumn fx:id="colStock"       text="Stock"       prefWidth="80"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox spacing="10"
+              alignment="CENTER_RIGHT"
+              style="-fx-padding:10;">
+            <Button text="Nuevo"  onAction="#onNuevoMaquinaria"/>
+            <Button text="Editar" onAction="#onEditarMaquinaria"/>
+            <Button text="Eliminar" onAction="#onEliminarMaquinaria"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
+

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.miempresa.agroventas.controller.EmpleadoController">
+
+    <top>
+        <Label text="Empleados" style="-fx-font-size: 20px; -fx-padding: 10;" />
+    </top>
+
+    <center>
+        <TableView fx:id="tablaEmpleados">
+            <columns>
+                <TableColumn fx:id="colId"           text="ID"           prefWidth="50"/>
+                <TableColumn fx:id="colNombre"       text="Nombre"       prefWidth="150"/>
+                <TableColumn fx:id="colCorreo"       text="Correo"       prefWidth="200"/>
+                <TableColumn fx:id="colDepartamento" text="Departamento" prefWidth="150"/>
+                <TableColumn fx:id="colCargo"        text="Cargo"        prefWidth="120"/>
+                <TableColumn fx:id="colSalario"      text="Salario"      prefWidth="80"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Button text="Nuevo"  onAction="#onNuevoEmpleado"/>
+            <Button text="Editar" onAction="#onEditarEmpleado"/>
+            <Button text="Eliminar" onAction="#onEliminarEmpleado"/>
+        </HBox>
+    </bottom>
+</BorderPane>
+
+
+

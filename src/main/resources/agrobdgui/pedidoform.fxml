@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10" style="-fx-padding:20"
+      xmlns="http://javafx.com/javafx/23.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.miempresa.agroventas.controller.PedidoFormController">
+
+    <!-- Fecha y comentario -->
+    <HBox alignment="CENTER" spacing="10">
+        <Label text="Fecha:"/>
+        <DatePicker fx:id="dpFecha"/>
+        <Label text="Comentario:"/>
+        <TextArea fx:id="taComentario"
+                  prefHeight="54" prefRowCount="2" prefWidth="229"/>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Selección de línea -->
+    <HBox alignment="CENTER" spacing="10">
+        <Label text="Maquinaria:"/>
+        <ComboBox fx:id="cbMaquinaria"
+                  prefWidth="180" promptText="Selecciona..."/>
+        <Label text="Cantidad:"/>
+        <Spinner fx:id="spCantidad" prefWidth="80"/>
+        <Button fx:id="btnAgregarLinea" onAction="#onAgregarLinea" text="Agregar línea"/>
+    </HBox>
+
+    <!-- Tabla de líneas -->
+    <TableView fx:id="tvLineas" prefHeight="200">
+        <columns>
+            <TableColumn fx:id="colNombre"
+                         prefWidth="150" text="Nombre"/>
+            <TableColumn fx:id="colTipo"
+                         prefWidth="100" text="Tipo"/>
+            <TableColumn fx:id="colDescripcion"
+                         prefWidth="150" text="Descripción"/>
+            <TableColumn fx:id="colCantidad"
+                         prefWidth="80"  text="Cantidad"/>
+            <TableColumn fx:id="colPrecio"
+                         prefWidth="100" text="P.Unitario (€)"/>
+            <TableColumn fx:id="colSubtotal"
+                         prefWidth="100" text="Subtotal (€)"/>
+        </columns>
+    </TableView>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button fx:id="btnEliminarLinea" onAction="#onEliminarLinea" text="Eliminar línea"/>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Total -->
+    <HBox alignment="CENTER_RIGHT" style="-fx-padding:5 0 5 0;">
+        <Label fx:id="lblTotal"
+               text="Total: 0.00 €"
+               style="-fx-font-size:14px; -fx-font-weight:bold;"/>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Guardar / Cancelar -->
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button fx:id="btnGuardar" onAction="#onGuardar" text="Guardar pedido"/>
+        <Button fx:id="btnCancelar" onAction="#onCancelar" text="Cancelar"/>
+    </HBox>
+</VBox>
+
+
+
+
