@@ -7,12 +7,29 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DAO para la entidad Maquinaria. Proporciona métodos para buscar una máquina por su
+ * identificador, listar todas las máquinas, crear nuevas, actualizar existentes
+ * y eliminar según su identificador. Gestiona la obtención de la conexión y el mapeo
+ * de los resultados SQL a objetos Maquinaria.
+ */
 public class MaquinariaDAO {
 
+    private static final String SQL_FIND_BY_ID = "SELECT * FROM maquinaria WHERE ID_Maquinaria = ?";
+    private static final String SQL_FIND_ALL = "SELECT * FROM maquinaria";
+    private static final String SQL_INSERT = "INSERT INTO maquinaria (ID_Proveedor, Nombre, Descripcion, Tipo, Precio, Stock) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String SQL_UPDATE = "UPDATE maquinaria SET ID_Proveedor = ?, Nombre = ?, Descripcion = ?, Tipo = ?, Precio = ?, Stock = ? WHERE ID_Maquinaria = ?";
+    private static final String SQL_DELETE = "DELETE FROM maquinaria WHERE ID_Maquinaria = ?";
+
+    /**
+     * Busca una instancia de Maquinaria por su identificador.
+     * @param id identificador de la maquinaria
+     * @return objeto Maquinaria con los datos de la fila encontrada, o null si no existe
+     * @throws Exception si ocurre un error de acceso a la base de datos
+     */
     public Maquinaria findById(int id) throws Exception {
-        String sql = "SELECT * FROM maquinaria WHERE ID_Maquinaria = ?";
-        try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try (Connection conn = ConnectionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? mapRow(rs) : null;
@@ -20,11 +37,15 @@ public class MaquinariaDAO {
         }
     }
 
+    /**
+     * Recupera la lista de todas las máquinas disponibles en la base de datos.
+     * @return lista de objetos Maquinaria (vacía en caso de no haber registros)
+     * @throws Exception si se produce un error durante la consulta
+     */
     public List<Maquinaria> findAll() throws Exception {
-        String sql = "SELECT * FROM maquinaria";
-        try (Connection c = ConnectionBD.getConnection();
-             Statement st = c.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+        try (Connection conn = ConnectionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_FIND_ALL);
+             ResultSet rs = ps.executeQuery()) {
             List<Maquinaria> list = new ArrayList<>();
             while (rs.next()) {
                 list.add(mapRow(rs));
@@ -33,66 +54,86 @@ public class MaquinariaDAO {
         }
     }
 
+    /**
+     * Inserta un nuevo registro de maquinaria. Al usar RETURN_GENERATED_KEYS, asigna
+     * el identificador generado al objeto Maquinaria proporcionado.
+     * @param m objeto Maquinaria con los campos ID_Proveedor, Nombre, Descripcion,
+     * Tipo, Precio y Stock definidos
+     * @throws Exception si falla la inserción o la obtención de la clave generada
+     */
     public void create(Maquinaria m) throws Exception {
-        String sql = "INSERT INTO maquinaria " +
-                "(ID_Proveedor, Nombre, Descripcion, Tipo, Precio, Stock) " +
-                "VALUES (?,?,?,?,?,?)";
-        try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt   (1, m.getIdProveedor());
+        try (Connection conn = ConnectionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, m.getIdProveedor());
             ps.setString(2, m.getNombre());
             ps.setString(3, m.getDescripcion());
             ps.setString(4, m.getTipo());
             ps.setDouble(5, m.getPrecio());
-            ps.setInt   (6, m.getStock());
+            ps.setInt(6, m.getStock());
             ps.executeUpdate();
-            try (ResultSet g = ps.getGeneratedKeys()) {
-                if (g.next()) {
-                    m.setIdMaquinaria(g.getInt(1));
+            try (ResultSet gk = ps.getGeneratedKeys()) {
+                if (gk.next()) {
+                    m.setIdMaquinaria(gk.getInt(1));
                 }
             }
         }
     }
 
+    /**
+     * Actualiza los datos de una máquina existente. Todos los campos salvo el
+     * identificador pueden modificarse.
+     * @param m objeto Maquinaria con el ID_Maquinaria y los nuevos valores de
+     * ID_Proveedor, Nombre, Descripcion, Tipo, Precio y Stock
+     * @throws Exception si ocurre un error al ejecutar la actualización
+     */
     public void update(Maquinaria m) throws Exception {
-        String sql = "UPDATE maquinaria SET " +
-                "ID_Proveedor=?, Nombre=?, Descripcion=?, Tipo=?, Precio=?, Stock=? " +
-                "WHERE ID_Maquinaria=?";
-        try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt   (1, m.getIdProveedor());
+        try (Connection conn = ConnectionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
+            ps.setInt(1, m.getIdProveedor());
             ps.setString(2, m.getNombre());
             ps.setString(3, m.getDescripcion());
             ps.setString(4, m.getTipo());
             ps.setDouble(5, m.getPrecio());
-            ps.setInt   (6, m.getStock());
-            ps.setInt   (7, m.getIdMaquinaria());
+            ps.setInt(6, m.getStock());
+            ps.setInt(7, m.getIdMaquinaria());
             ps.executeUpdate();
         }
     }
 
+    /**
+     * Elimina el registro de maquinaria con el identificador especificado.
+     * @param id identificador de la máquina a eliminar
+     * @throws Exception si ocurre un error al ejecutar la eliminación
+     */
     public void delete(int id) throws Exception {
-        String sql = "DELETE FROM maquinaria WHERE ID_Maquinaria=?";
-        try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try (Connection conn = ConnectionBD.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
+    /**
+     * Convierte la fila actual de un ResultSet en una instancia de Maquinaria,
+     * leyendo todas sus columnas.
+     * @param rs ResultSet posicionado en la fila a mapear
+     * @return objeto Maquinaria con datos cargados
+     * @throws SQLException si falla la lectura de columnas
+     */
     private Maquinaria mapRow(ResultSet rs) throws SQLException {
-        return new Maquinaria(
-                rs.getInt   ("ID_Maquinaria"),
-                rs.getInt   ("ID_Proveedor"),
-                rs.getString("Nombre"),
-                rs.getString("Descripcion"),
-                rs.getString("Tipo"),
-                rs.getDouble("Precio"),
-                rs.getInt   ("Stock")
-        );
+        Maquinaria m = new Maquinaria();
+        m.setIdMaquinaria(rs.getInt("ID_Maquinaria"));
+        m.setIdProveedor(rs.getInt("ID_Proveedor"));
+        m.setNombre(rs.getString("Nombre"));
+        m.setDescripcion(rs.getString("Descripcion"));
+        m.setTipo(rs.getString("Tipo"));
+        m.setPrecio(rs.getDouble("Precio"));
+        m.setStock(rs.getInt("Stock"));
+        return m;
     }
 }
+
+
 
 
 

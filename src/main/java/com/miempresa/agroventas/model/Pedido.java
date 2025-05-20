@@ -12,11 +12,7 @@ public class Pedido {
 
     public Pedido() {}
 
-    public Pedido(int idPedido,
-                  int idCliente,
-                  LocalDate fechaPedido,
-                  EstadosPedido estado,
-                  String comentario) {
+    public Pedido(int idPedido, int idCliente, LocalDate fechaPedido, EstadosPedido estado, String comentario) {
         this.idPedido     = idPedido;
         this.idCliente    = idCliente;
         this.fechaPedido  = fechaPedido;

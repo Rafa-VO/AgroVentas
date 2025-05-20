@@ -11,13 +11,7 @@ public class Maquinaria {
 
     public Maquinaria() {}
 
-    public Maquinaria(int idMaquinaria,
-                      int idProveedor,
-                      String nombre,
-                      String descripcion,
-                      String tipo,
-                      double precio,
-                      int stock) {
+    public Maquinaria(int idMaquinaria, int idProveedor, String nombre, String descripcion, String tipo, double precio, int stock) {
         this.idMaquinaria = idMaquinaria;
         this.idProveedor  = idProveedor;
         this.nombre       = nombre;

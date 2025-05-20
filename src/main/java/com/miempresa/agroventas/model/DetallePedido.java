@@ -8,8 +8,7 @@ public class DetallePedido {
 
     public DetallePedido() {}
 
-    public DetallePedido(int idPedido, int idMaquinaria,
-                         int cantidad, double precioUnitario) {
+    public DetallePedido(int idPedido, int idMaquinaria, int cantidad, double precioUnitario) {
         this.idPedido = idPedido;
         this.idMaquinaria = idMaquinaria;
         this.cantidad = cantidad;

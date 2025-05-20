@@ -9,10 +9,21 @@ import java.util.List;
 
 public class ProveedorDAO {
 
+    private static final String SQL_FIND_BY_ID = "SELECT * FROM proveedor WHERE ID_Proveedor = ?";
+    private static final String SQL_FIND_ALL = "SELECT * FROM proveedor";
+    private static final String SQL_INSERT = "INSERT INTO proveedor (Nombre, Telefono, Email) VALUES (?,?,?)";
+    private static final String SQL_UPDATE = "UPDATE proveedor SET Nombre = ?, Telefono = ?, Email = ? WHERE ID_Proveedor = ?";
+    private static final String SQL_DELETE = "DELETE FROM proveedor WHERE ID_Proveedor = ?";
+
+    /**
+     * Busca un proveedor por su identificador.
+     * @param id identificador del proveedor
+     * @return instancia de Proveedor si existe, o null si no se encuentra
+     * @throws Exception en caso de error de acceso a la base de datos
+     */
     public Proveedor findById(int id) throws Exception {
-        String sql = "SELECT * FROM proveedor WHERE ID_Proveedor = ?";
         try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? mapRow(rs) : null;
@@ -20,39 +31,48 @@ public class ProveedorDAO {
         }
     }
 
+    /**
+     * Recupera todos los proveedores registrados.
+     * @return lista de Proveedor, vacía si no hay registros
+     * @throws Exception en caso de error de acceso a la base de datos
+     */
     public List<Proveedor> findAll() throws Exception {
-        String sql = "SELECT * FROM proveedor";
         try (Connection c = ConnectionBD.getConnection();
-             Statement st = c.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+             PreparedStatement ps = c.prepareStatement(SQL_FIND_ALL);
+             ResultSet rs = ps.executeQuery()) {
             List<Proveedor> list = new ArrayList<>();
-            while (rs.next()) {
-                list.add(mapRow(rs));
-            }
+            while (rs.next()) list.add(mapRow(rs));
             return list;
         }
     }
 
+    /**
+     * Inserta un nuevo proveedor en la base de datos.
+     * Al usar RETURN_GENERATED_KEYS, asigna el ID generado al objeto Proveedor.
+     * @param p objeto Proveedor con nombre, teléfono y email definidos
+     * @throws Exception en caso de error durante la inserción
+     */
     public void create(Proveedor p) throws Exception {
-        String sql = "INSERT INTO proveedor (Nombre, Telefono, Email) VALUES (?,?,?)";
         try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement ps = c.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getNombre());
             ps.setString(2, p.getTelefono());
             ps.setString(3, p.getEmail());
             ps.executeUpdate();
             try (ResultSet g = ps.getGeneratedKeys()) {
-                if (g.next()) {
-                    p.setIdProveedor(g.getInt(1));
-                }
+                if (g.next()) p.setIdProveedor(g.getInt(1));
             }
         }
     }
 
+    /**
+     * Actualiza los datos de un proveedor existente.
+     * @param p objeto Proveedor con ID y nuevos valores de nombre, teléfono y email
+     * @throws Exception en caso de error durante la actualización
+     */
     public void update(Proveedor p) throws Exception {
-        String sql = "UPDATE proveedor SET Nombre = ?, Telefono = ?, Email = ? WHERE ID_Proveedor = ?";
         try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(SQL_UPDATE)) {
             ps.setString(1, p.getNombre());
             ps.setString(2, p.getTelefono());
             ps.setString(3, p.getEmail());
@@ -61,24 +81,35 @@ public class ProveedorDAO {
         }
     }
 
+    /**
+     * Elimina un proveedor por su identificador.
+     * @param id identificador del proveedor a eliminar
+     * @throws Exception en caso de error durante la eliminación
+     */
     public void delete(int id) throws Exception {
-        String sql = "DELETE FROM proveedor WHERE ID_Proveedor = ?";
         try (Connection c = ConnectionBD.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+             PreparedStatement ps = c.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
-    /** Mapea un ResultSet a un objeto Proveedor */
+    /**
+     * Mapea la fila actual del ResultSet a un objeto Proveedor.
+     * @param rs ResultSet posicionado en la fila a convertir
+     * @return instancia de Proveedor con los campos cargados
+     * @throws SQLException en caso de error al leer datos del ResultSet
+     */
     private Proveedor mapRow(ResultSet rs) throws SQLException {
         return new Proveedor(
-                rs.getInt   ("ID_Proveedor"),
+                rs.getInt("ID_Proveedor"),
                 rs.getString("Nombre"),
                 rs.getString("Telefono"),
                 rs.getString("Email")
         );
     }
 }
+
+
 
 

@@ -16,6 +16,11 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
+/**
+ * Controlador de la vista de gestión de Empleados.
+ * Permite listar, crear, editar y eliminar empleados de la base de datos
+ * usando un TableView y formularios modales.
+ */
 public class EmpleadoController {
 
     @FXML private TableView<Empleado>           tablaEmpleados;
@@ -28,6 +33,11 @@ public class EmpleadoController {
 
     private final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
 
+    /**
+     * Inicializa las columnas de la tabla vinculándolas a las propiedades
+     * del modelo Empleado y carga la lista de empleados.
+     * Ejecutado automáticamente tras el cargado del FXML.
+     */
     @FXML
     public void initialize() {
         colId           .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getIdUsuario()));
@@ -40,92 +50,132 @@ public class EmpleadoController {
         loadEmpleados();
     }
 
+    /**
+     * Recupera todos los empleados desde la capa DAO y los inserta
+     * en el TableView. En caso de error, muestra un diálogo con detalles.
+     */
     private void loadEmpleados() {
         try {
             tablaEmpleados.setItems(
                     FXCollections.observableArrayList(empleadoDAO.findAll())
             );
         } catch (Exception e) {
-            showError("Error al cargar empleados",
+            showError(
+                    "Error al cargar empleados",
                     "No se pudieron leer empleados de la base de datos",
-                    e);
+                    e
+            );
         }
     }
 
+    /**
+     * Acción asociada al botón "Nuevo Empleado".
+     * Abre el formulario en modo creación, pasando un objeto Empleado vacío.
+     */
     @FXML
     private void onNuevoEmpleado() {
         abrirFormularioEmpleado("Nuevo Empleado", new Empleado());
     }
 
+    /**
+     * Acción asociada al botón "Editar Empleado".
+     * Si hay selección, abre el formulario en modo edición con el empleado seleccionado.
+     * Si no, muestra un mensaje de error.
+     */
     @FXML
     private void onEditarEmpleado() {
         Empleado sel = tablaEmpleados.getSelectionModel().getSelectedItem();
         if (sel == null) {
-            showError("Selecciona un empleado",
-                    "Debes elegir un empleado de la lista antes de editar.");
+            showError(
+                    "Selecciona un empleado",
+                    "Debes elegir un empleado de la lista antes de editar."
+            );
             return;
         }
         abrirFormularioEmpleado("Editar Empleado", sel);
     }
 
+    /**
+     * Método auxiliar que abre un diálogo modal con el formulario de Empleado.
+     * Recibe el título de la ventana y el objeto Empleado (nuevo o existente).
+     * Tras cerrar, si el formulario confirmó cambios, recarga la tabla.
+     * @param titulo  título de la ventana modal
+     * @param objeto  instancia de Empleado a crear o editar
+     */
     private void abrirFormularioEmpleado(String titulo, Empleado objeto) {
         try {
-            // 1) Localizar el FXML en el classpath
+            // 1) Localiza el FXML
             URL fxmlUrl = getClass().getResource("/agrobdgui/empleadoform.fxml");
             if (fxmlUrl == null) {
                 throw new IllegalStateException(
-                        "No encuentro /agrobdgui/empleadoform.fxml en el JAR");
+                        "No encuentro /agrobdgui/empleadoform.fxml en el classpath"
+                );
             }
 
-            // 2) Cargarlo
+            // 2) Carga el layout
             FXMLLoader loader = new FXMLLoader(fxmlUrl);
             Parent root = loader.load();
 
-            // 3) Preparar el Stage modal
+            // 3) Prepara la ventana modal
             Stage dialog = new Stage();
             dialog.setTitle(titulo);
             dialog.initOwner(tablaEmpleados.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setScene(new Scene(root));
 
-            // 4) Pasar el Empleado al formulario
+            // 4) Inicializa el formulario con el Empleado
             EmpleadoFormController fc = loader.getController();
             fc.initForm(dialog, objeto);
 
-            // 5) Mostrar y, si pulsa OK, recargar tabla
+            // 5) Muestra y, si confirma, recarga la tabla
             dialog.showAndWait();
             if (fc.isOkClicked()) {
                 loadEmpleados();
             }
 
         } catch (Exception e) {
-            showError("Error al abrir formulario",
+            showError(
+                    "Error al abrir formulario",
                     "Comprueba la ruta y sintaxis de empleadoform.fxml",
-                    e);
+                    e
+            );
         }
     }
 
+    /**
+     * Acción asociada al botón "Eliminar Empleado".
+     * Elimina de la BD al empleado seleccionado, o muestra un error si no hay selección
+     * o si falla la operación.
+     */
     @FXML
     private void onEliminarEmpleado() {
         Empleado sel = tablaEmpleados.getSelectionModel().getSelectedItem();
         if (sel == null) {
-            showError("Selecciona un empleado",
-                    "Debes elegir un empleado de la lista antes de eliminar.");
+            showError(
+                    "Selecciona un empleado",
+                    "Debes elegir un empleado de la lista antes de eliminar."
+            );
             return;
         }
         try {
             empleadoDAO.delete(sel.getIdUsuario());
             loadEmpleados();
         } catch (Exception e) {
-            showError("Error al eliminar empleado",
+            showError(
+                    "Error al eliminar empleado",
                     "No se pudo borrar al empleado de la base de datos",
-                    e);
+                    e
+            );
         }
     }
 
-    // Versión mejorada de showError que imprime el stack trace y muestra e.toString()
+    /**
+     * Muestra un diálogo de alerta de tipo ERROR con detalles de excepción.
+     * @param header texto de cabecera de la alerta
+     * @param msg    mensaje descriptivo del error
+     * @param e      excepción capturada para imprimir stack trace y toString()
+     */
     private void showError(String header, String msg, Exception e) {
-        // para ver todo en la consola
         e.printStackTrace();
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -133,7 +183,12 @@ public class EmpleadoController {
         alert.setContentText(msg + "\n\n" + e.toString());
         alert.showAndWait();
     }
-    // Sobrecarga para casos simples sin exception
+
+    /**
+     * Sobrecarga de showError para errores sin excepción asociada.
+     * @param header texto de cabecera de la alerta
+     * @param msg    mensaje descriptivo del error
+     */
     private void showError(String header, String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -142,6 +197,7 @@ public class EmpleadoController {
         alert.showAndWait();
     }
 }
+
 
 
 
