@@ -2,75 +2,6 @@
 
 AgroVentas es una aplicación desarrollada en Java que ofrece a clientes y empresas interesadas en el sector agrícola una plataforma para la compra de maquinaria y productos agrícolas. Basada en el patrón MVC y conectada a una base de datos MySQL, la aplicación permite a los empleados gestionar clientes, validar pedidos, y dar de alta, modificar o eliminar maquinaria y nuevos productos. Por otra parte, los clientes podrán hacer pedidos, consultar el estado de los estos y actualizar su propio perfil.
 
-## Estructura del proyecto
-
-src/
-├─ main/
-│  ├─ java/com/miempresa/agroventas/
-│  │  ├─ baseDatos/
-│  │  │  ├─ ConnectionBD.java
-│  │  │  ├─ ConnectionProperties.java
-│  │  │  └─ XMLManager.java
-│  │  ├─ controller/
-│  │  │  ├─ MainApp.java
-│  │  │  ├─ LoginController.java
-│  │  │  ├─ ClienteController.java
-│  │  │  ├─ ClienteFormController.java
-│  │  │  ├─ EmpleadoController.java
-│  │  │  ├─ EmpleadoFormController.java
-│  │  │  ├─ MaquinariaController.java
-│  │  │  ├─ MaquinariaFormController.java
-│  │  │  ├─ PedidoController.java
-│  │  │  ├─ PedidoFormController.java
-│  │  │  ├─ PedidoStateController.java
-│  │  │  └─ UsuarioFormController.java
-│  │  ├─ dao/
-│  │  │  ├─ ClienteDAO.java
-│  │  │  ├─ EmpleadoDAO.java
-│  │  │  ├─ MaquinariaDAO.java
-│  │  │  ├─ PedidoDAO.java
-│  │  │  ├─ DetallePedidoDAO.java
-│  │  │  ├─ ProveedorDAO.java
-│  │  │  ├─ UsuarioDAO.java
-│  │  │  └─ ValidacionDAO.java
-│  │  ├─ interfaces/
-│  │  │  ├─ Role.java
-│  │  │  └─ EstadosPedido.java
-│  │  ├─ model/
-│  │  │  ├─ Usuario.java
-│  │  │  ├─ Cliente.java
-│  │  │  ├─ Empleado.java
-│  │  │  ├─ Proveedor.java
-│  │  │  ├─ Maquinaria.java
-│  │  │  ├─ Pedido.java
-│  │  │  ├─ DetallePedido.java
-│  │  │  └─ Validacion.java
-│  │  └─ util/
-│  │     └─ Session.java
-│  └─ resources/
-│     ├─ agrobdgui/
-│     │  ├─ root.fxml
-│     │  ├─ login.fxml
-│     │  ├─ cliente.fxml
-│     │  ├─ clienteform.fxml
-│     │  ├─ clienteView.fxml
-│     │  ├─ empleado.fxml
-│     │  ├─ empleadoform.fxml
-│     │  ├─ empleadoView.fxml
-│     │  ├─ maquinaria.fxml
-│     │  ├─ maquinariaform.fxml
-│     │  ├─ pedidoList.fxml
-│     │  ├─ pedidoListEmpleado.fxml
-│     │  ├─ pedidoform.fxml
-│     │  ├─ pedidoStateForm.fxml
-│     │  ├─ usuario.fxml
-│     │  └─ usuarioform.fxml
-│     ├─ connection.xml
-│     ├─ css/login.css
-│     └─ imagenes/
-│        ├─ FondoLogin.png
-│        └─ ImagenCliente1.png
-
 
 ## Descripcion de las clases
 
@@ -82,6 +13,7 @@ src/
 
 
 1. BaseDatos
+   
       ConnectionBD: Gestiona la conexión JDBC con la base de datos MySQL.
       
       ConnectionProperties: Carga desde un fichero XML los parámetros de conexión (URL, usuario, contraseña).
@@ -108,29 +40,35 @@ src/
 
 
 3. DAO
+   
       ClienteDAO, EmpleadoDAO, MaquinariaDAO, PedidoDAO, DetallePedidoDAO, ProveedorDAO, UsuarioDAO: Cada uno implementa las operaciones CRUD (create, read, update, delete) sobre su tabla correspondiente.
       
       ValidacionDAO: Gestiona el registro de validaciones que hacen los empleados sobre los pedidos.
 
 
 4. Interfaces
+   
       Role: Enumeración de roles de usuario (CLIENTE y EMPLEADO).
       
       EstadosPedido: Enumeración de los posibles estados de un pedido (PENDIENTE, ENVIADO, ENTREGADO, CANCELADO).
 
 5. Model
+   
       Usuario, Cliente, Empleado: Clases simples que reflejan la jerarquía de usuario (Usuario es superclase; Cliente y Empleado la extienden).
       
       Maquinaria, Proveedor, Pedido, DetallePedido, Validacion: Clases que representan las entidades de la base de datos con sus atributos y métodos simples de acceso.
 
 
 6. Util
+    
       Session: Almacena en memoria el usuario logueado y su rol para controlar permisos en toda la aplicación.
 
 7. Views
+    
       ClienteViewController, EmpleadoViewController: Controladores de vistas específicas (por ejemplo cuadros de diálogo o componentes personalizados) para clientes y empleados.
 
 8. FXML
+    
       root.fxml: Define el layout principal de la aplicación (menú lateral, cabecera y zona de contenido).
       
       login.fxml: Pantalla de login: campos de usuario/contraseña y botón de acceso.
@@ -165,6 +103,7 @@ src/
 
 
 9. Otros Recursos
+    
       connection.xm: Fichero de configuración XML con los parámetros de conexión a la base de datos (URL, usuario, contraseña) que lee XMLManager.
       
       css/login.css: Hoja de estilo que da formato específico a la pantalla de login (colores, fuentes, márgenes…).
