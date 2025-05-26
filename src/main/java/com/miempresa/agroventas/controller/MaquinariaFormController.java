@@ -4,6 +4,7 @@ import com.miempresa.agroventas.DAO.MaquinariaDAO;
 import com.miempresa.agroventas.DAO.ProveedorDAO;
 import com.miempresa.agroventas.model.Maquinaria;
 import com.miempresa.agroventas.model.Proveedor;
+import com.miempresa.agroventas.util.Session;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -25,12 +26,9 @@ public class MaquinariaFormController {
     @FXML private TextField tfTipo;
     @FXML private TextField tfPrecio;
     @FXML private Spinner<Integer> spStock;
-    @FXML private Button btnGuardar;
-    @FXML private Button btnCancelar;
 
     private Stage dialogStage;
     private boolean okClicked = false;
-    private final MaquinariaDAO dao = new MaquinariaDAO();
     private Maquinaria maquinaria;
 
     /**
@@ -44,13 +42,6 @@ public class MaquinariaFormController {
         spStock.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0)
         );
-
-        try {
-            List<Proveedor> provs = new ProveedorDAO().findAll();
-            cbProveedor.setItems(FXCollections.observableArrayList(provs));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         cbProveedor.setConverter(new StringConverter<>() {
             @Override
@@ -74,6 +65,14 @@ public class MaquinariaFormController {
                 );
             }
         });
+
+        try {
+            List<Proveedor> lista = new ProveedorDAO().findAll();
+            cbProveedor.getItems().setAll(lista);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // o muestra alerta
+        }
     }
 
     /**
@@ -96,7 +95,7 @@ public class MaquinariaFormController {
         this.maquinaria = m;
         if (m.getIdMaquinaria() != 0) {
             try {
-                Proveedor p = new ProveedorDAO().findById(m.getIdProveedor());
+                Proveedor p = m.getProveedor();
                 if (p != null) {
                     cbProveedor.getSelectionModel().select(p);
                 }
@@ -153,7 +152,7 @@ public class MaquinariaFormController {
             return;
         }
 
-        maquinaria.setIdProveedor(sel.getIdProveedor());
+        maquinaria.setProveedor(cbProveedor.getValue());
         maquinaria.setNombre(tfNombre.getText());
         maquinaria.setDescripcion(taDescripcion.getText());
         maquinaria.setTipo(tfTipo.getText());
@@ -162,9 +161,9 @@ public class MaquinariaFormController {
 
         try {
             if (maquinaria.getIdMaquinaria() == 0) {
-                dao.create(maquinaria);
+                Session.getCurrentEmpleado().anadirMaquinaria(maquinaria);
             } else {
-                dao.update(maquinaria);
+                Session.getCurrentEmpleado().actualizarMaquinaria(maquinaria);
             }
             okClicked = true;
             dialogStage.close();

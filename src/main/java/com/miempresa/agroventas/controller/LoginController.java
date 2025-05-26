@@ -39,9 +39,6 @@ public class LoginController {
 
     private ToggleGroup roleGroup;
 
-    private final UsuarioDAO  usuarioDAO   = new UsuarioDAO();
-    private final ClienteDAO  clienteDAO   = new ClienteDAO();
-    private final EmpleadoDAO empleadoDAO  = new EmpleadoDAO();
 
     /**
      * Inicializa el ToggleGroup de roles y selecciona Cliente por defecto.
@@ -77,7 +74,7 @@ public class LoginController {
 
         Usuario u;
         try {
-            u = usuarioDAO.findByEmailAndPassword(correo, pwd);
+            u = UsuarioDAO.findByEmailAndPassword(correo, pwd);
         } catch (Exception ex) {
             lblError.setText("Error al validar usuario: " + ex.getMessage());
             return;
@@ -90,8 +87,8 @@ public class LoginController {
         boolean wantCliente = rbCliente.isSelected();
         boolean isCliente, isEmpleado;
         try {
-            isCliente  = clienteDAO.findById(u.getIdUsuario())  != null;
-            isEmpleado = empleadoDAO.findById(u.getIdUsuario()) != null;
+            isCliente  = ClienteDAO.findById(u.getIdUsuario())  != null;
+            isEmpleado = EmpleadoDAO.findById(u.getIdUsuario()) != null;
         } catch (Exception ex) {
             lblError.setText("Error al comprobar rol: " + ex.getMessage());
             return;
@@ -110,7 +107,7 @@ public class LoginController {
         Role role = wantCliente ? Role.CLIENTE : Role.EMPLEADO;
         Session.login(u, role);
 
-        Stage st = (Stage) tfCorreo.getScene().getWindow();
+        Stage st = (Stage) tfCorreo.getScene().getWindow(); //Aqui
         st.close();
         try {
             MainApp.showMainView(new Stage());
@@ -144,7 +141,7 @@ public class LoginController {
 
         try {
             // 1) Buscar usuario existente o preparar uno nuevo
-            Usuario u = usuarioDAO.findByEmail(correo);
+            Usuario u = UsuarioDAO.findByEmail(correo);
             if (u == null) {
                 // Formulario modal para crear Usuario (correo + contraseña)
                 FXMLLoader ufLoader = new FXMLLoader(
@@ -175,9 +172,9 @@ public class LoginController {
             // 2) Guardar o actualizar Usuario (ignorar duplicados)
             try {
                 if (u.getIdUsuario() == 0) {
-                    usuarioDAO.create(u);
+                    UsuarioDAO.create(u);
                 } else {
-                    usuarioDAO.update(u);
+                    UsuarioDAO.update(u);
                 }
             } catch (SQLException sqlEx) {
                 if (!sqlEx.getMessage().toLowerCase().contains("duplicate")) {
@@ -186,8 +183,8 @@ public class LoginController {
             }
 
             // 3) Verificar rol ya existente
-            boolean isCliente  = clienteDAO.findById(u.getIdUsuario())  != null;
-            boolean isEmpleado = empleadoDAO.findById(u.getIdUsuario()) != null;
+            boolean isCliente  = ClienteDAO.findById(u.getIdUsuario())  != null;
+            boolean isEmpleado = EmpleadoDAO.findById(u.getIdUsuario()) != null;
             if (wantCliente && isCliente) {
                 lblError.setText("Este usuario ya está registrado como Cliente.");
                 return;
@@ -219,7 +216,7 @@ public class LoginController {
                     return;
                 }
                 try {
-                    clienteDAO.create(c);
+                    ClienteDAO.create(c);
                 } catch (SQLException sqlEx) {
                     if (!sqlEx.getMessage().toLowerCase().contains("duplicate")) {
                         throw sqlEx;
@@ -245,7 +242,7 @@ public class LoginController {
                     return;
                 }
                 try {
-                    empleadoDAO.create(e);
+                    EmpleadoDAO.create(e);
                 } catch (SQLException sqlEx) {
                     if (!sqlEx.getMessage().toLowerCase().contains("duplicate")) {
                         throw sqlEx;
@@ -271,7 +268,7 @@ public class LoginController {
      * @param u Usuario ya autenticado
      */
     private void showClienteFormAndLogin(Usuario u) throws Exception {
-        if (clienteDAO.findById(u.getIdUsuario()) != null) {
+        if (ClienteDAO.findById(u.getIdUsuario()) != null) {
             lblError.setText("Ya tienes cuenta de cliente.");
             return;
         }
@@ -297,7 +294,7 @@ public class LoginController {
             return;
         }
 
-        clienteDAO.create(c);
+        ClienteDAO.create(c);
         Session.login(u, Role.CLIENTE);
         closeAndLaunchMain();
     }
@@ -308,7 +305,7 @@ public class LoginController {
      * @param u Usuario ya autenticado
      */
     private void showEmpleadoFormAndLogin(Usuario u) throws Exception {
-        if (empleadoDAO.findById(u.getIdUsuario()) != null) {
+        if (EmpleadoDAO.findById(u.getIdUsuario()) != null) {
             lblError.setText("Ya tienes cuenta de empleado.");
             return;
         }
@@ -333,7 +330,7 @@ public class LoginController {
             return;
         }
 
-        empleadoDAO.create(e);
+        EmpleadoDAO.create(e);
         Session.login(u, Role.EMPLEADO);
         closeAndLaunchMain();
     }

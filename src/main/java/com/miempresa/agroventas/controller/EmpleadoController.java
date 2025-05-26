@@ -2,6 +2,7 @@ package com.miempresa.agroventas.controller;
 
 import com.miempresa.agroventas.DAO.EmpleadoDAO;
 import com.miempresa.agroventas.model.Empleado;
+import com.miempresa.agroventas.model.Usuario;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -31,7 +32,6 @@ public class EmpleadoController {
     @FXML private TableColumn<Empleado,String>  colCargo;
     @FXML private TableColumn<Empleado,Double>  colSalario;
 
-    private final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
 
     /**
      * Inicializa las columnas de la tabla vinculándolas a las propiedades
@@ -57,7 +57,7 @@ public class EmpleadoController {
     private void loadEmpleados() {
         try {
             tablaEmpleados.setItems(
-                    FXCollections.observableArrayList(empleadoDAO.findAll())
+                    FXCollections.observableArrayList(EmpleadoDAO.findAll())
             );
         } catch (Exception e) {
             showError(
@@ -158,7 +158,8 @@ public class EmpleadoController {
             return;
         }
         try {
-            empleadoDAO.delete(sel.getIdUsuario());
+            EmpleadoDAO.delete(sel.getIdUsuario());
+
             loadEmpleados();
         } catch (Exception e) {
             showError(

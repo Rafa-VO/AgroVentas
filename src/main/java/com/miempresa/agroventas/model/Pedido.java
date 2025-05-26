@@ -1,23 +1,52 @@
 package com.miempresa.agroventas.model;
 
 import com.miempresa.agroventas.interfaces.EstadosPedido;
+import com.miempresa.agroventas.util.Session;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Pedido {
     private int idPedido;
-    private int idCliente;
     private LocalDate fechaPedido;
     private EstadosPedido estado;
     private String comentario;
+    private Cliente cliente;
+    private Empleado empleado;
+    private List<Maquinaria> maquinarias;
 
-    public Pedido() {}
 
-    public Pedido(int idPedido, int idCliente, LocalDate fechaPedido, EstadosPedido estado, String comentario) {
+    public Pedido() {
+        try {
+            if(Session.getCurrentCliente() != null) {
+            this.cliente = Session.getCurrentCliente();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Pedido(int idPedido, LocalDate fechaPedido, EstadosPedido estado, String comentario) {
         this.idPedido     = idPedido;
-        this.idCliente    = idCliente;
         this.fechaPedido  = fechaPedido;
         this.estado       = estado;
         this.comentario   = comentario;
+        try {
+            if(Session.getCurrentCliente() != null) {
+                this.cliente = Session.getCurrentCliente();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Maquinaria> getmaquinarias() {
+        return maquinarias;
+    }
+
+    public void setMaquinarias(List<Maquinaria> maquinarias) {
+        this.maquinarias = maquinarias;
     }
 
     public int getIdPedido() {
@@ -28,13 +57,6 @@ public class Pedido {
         this.idPedido = idPedido;
     }
 
-    public int getIdCliente() {
-        return idCliente;
-    }
-
-    public void setIdCliente(int idCliente) {
-        this.idCliente = idCliente;
-    }
 
     public LocalDate getFechaPedido() {
         return fechaPedido;
@@ -60,11 +82,27 @@ public class Pedido {
         this.comentario = comentario;
     }
 
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public Empleado getEmpleado() {
+        return empleado;
+    }
+
+    public void setEmpleado(Empleado empleado) {
+        this.empleado = empleado;
+    }
+
     @Override
     public String toString() {
         return "Pedido{" +
                 "idPedido=" + idPedido +
-                ", idCliente=" + idCliente +
+                ", idCliente=" + getCliente().getIdUsuario() +
                 ", fechaPedido=" + fechaPedido +
                 ", estado=" + estado +
                 ", comentario='" + comentario + '\'' +

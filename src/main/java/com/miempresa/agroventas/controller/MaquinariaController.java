@@ -1,7 +1,9 @@
 package com.miempresa.agroventas.controller;
 
 import com.miempresa.agroventas.DAO.MaquinariaDAO;
+import com.miempresa.agroventas.model.Empleado;
 import com.miempresa.agroventas.model.Maquinaria;
+import com.miempresa.agroventas.util.Session;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -28,8 +30,6 @@ public class MaquinariaController {
     @FXML private TableColumn<Maquinaria,Double>  colPrecio;
     @FXML private TableColumn<Maquinaria,Integer> colStock;
 
-    private final MaquinariaDAO dao = new MaquinariaDAO();
-
     /**
      * Inicializa las columnas de la tabla vinculándolas a las propiedades
      * del modelo Maquinaria y carga los datos llamando a loadMaquinaria.
@@ -52,7 +52,7 @@ public class MaquinariaController {
      */
     private void loadMaquinaria() {
         try {
-            var list = dao.findAll();
+            var list = Session.getCurrentEmpleado().getMaquinarias();
             tablaMaquinaria.setItems(FXCollections.observableArrayList(list));
         } catch (Exception e) {
             showError("Error al cargar maquinaria", e.getMessage());
@@ -94,7 +94,7 @@ public class MaquinariaController {
             return;
         }
         try {
-            dao.delete(sel.getIdMaquinaria());
+            Session.getCurrentEmpleado().eliminarMaquinaria(sel);
             loadMaquinaria();
         } catch (Exception e) {
             showError("No se pudo eliminar maquinaria", e.getMessage());
@@ -113,12 +113,11 @@ public class MaquinariaController {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/agrobdgui/maquinariaForm.fxml")
             );
-            Parent root = loader.load();
             Stage dialog = new Stage();
             dialog.initOwner(tablaMaquinaria.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setTitle(titulo);
-            dialog.setScene(new Scene(root));
+            dialog.setScene(new Scene(loader.load()));
 
             MaquinariaFormController ctrl = loader.getController();
             ctrl.setDialogStage(dialog);

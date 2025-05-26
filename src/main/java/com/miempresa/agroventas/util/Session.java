@@ -1,8 +1,10 @@
 package com.miempresa.agroventas.util;
 
 import com.miempresa.agroventas.DAO.ClienteDAO;
+import com.miempresa.agroventas.DAO.EmpleadoDAO;
 import com.miempresa.agroventas.interfaces.Role;
 import com.miempresa.agroventas.model.Cliente;
+import com.miempresa.agroventas.model.Empleado;
 import com.miempresa.agroventas.model.Usuario;
 
 public class Session {
@@ -43,6 +45,11 @@ public class Session {
     public static Cliente getCurrentCliente() throws Exception {
         if (usuario == null) return null;
         return new ClienteDAO().findById(usuario.getIdUsuario());
+    }
+
+    public static Empleado getCurrentEmpleado() throws Exception {
+        if (usuario == null) return null;
+        return new EmpleadoDAO().findById(usuario.getIdUsuario());
     }
 }
 

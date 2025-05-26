@@ -9,14 +9,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PedidoDAO {
+public class  PedidoDAO {
 
     // Consultas SQL definidas como constantes
     private static final String SQL_FIND_BY_ID = "SELECT * FROM pedido WHERE ID_Pedido = ?";
     private static final String SQL_FIND_BY_CLIENTE_ID = "SELECT * FROM pedido WHERE ID_Cliente = ?";
     private static final String SQL_FIND_ALL = "SELECT * FROM pedido";
     private static final String SQL_INSERT = "INSERT INTO pedido (ID_Cliente, FechaInicio, Estado, Comentario) VALUES (?,?,?,?)";
-    private static final String SQL_UPDATE = "UPDATE pedido SET ID_Cliente = ?, FechaInicio = ?, Estado = ?, Comentario = ? WHERE ID_Pedido = ?";
+    private static final String SQL_UPDATE = "UPDATE pedido SET FechaInicio = ?, Estado = ?, Comentario = ? WHERE ID_Pedido = ?";
     private static final String SQL_DELETE = "DELETE FROM pedido WHERE ID_Pedido = ?";
 
     /**
@@ -26,7 +26,7 @@ public class PedidoDAO {
      * @param estadoStr cadena recuperada de la columna Estado
      * @return valor de EstadosPedido que corresponde al texto proporcionado
      */
-    private EstadosPedido mapEstado(String estadoStr) {
+    private static EstadosPedido mapEstado(String estadoStr) {
         if (estadoStr == null) return EstadosPedido.PENDIENTE;
         try {
             return EstadosPedido.valueOf(estadoStr.trim().toUpperCase());
@@ -43,7 +43,7 @@ public class PedidoDAO {
      * @return instancia de Pedido con los datos encontrados o null si no hay registro
      * @throws Exception si ocurre cualquier error de acceso a la base de datos
      */
-    public Pedido findById(int id) throws Exception {
+    public static Pedido findById(int id) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, id);
@@ -53,7 +53,6 @@ public class PedidoDAO {
                     EstadosPedido estado = mapEstado(rs.getString("Estado"));
                     return new Pedido(
                             rs.getInt("ID_Pedido"),
-                            rs.getInt("ID_Cliente"),
                             fecha,
                             estado,
                             rs.getString("Comentario")
@@ -72,7 +71,7 @@ public class PedidoDAO {
      * @return lista de objetos Pedido para ese cliente (vacía si no hay registros)
      * @throws Exception si ocurre un error al acceder a la base de datos
      */
-    public List<Pedido> findByClienteId(int idCliente) throws Exception {
+    public static List<Pedido> findByClienteId(int idCliente) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_BY_CLIENTE_ID)) {
             ps.setInt(1, idCliente);
@@ -83,7 +82,6 @@ public class PedidoDAO {
                     EstadosPedido estado = mapEstado(rs.getString("Estado"));
                     list.add(new Pedido(
                             rs.getInt("ID_Pedido"),
-                            rs.getInt("ID_Cliente"),
                             fecha,
                             estado,
                             rs.getString("Comentario")
@@ -101,17 +99,16 @@ public class PedidoDAO {
      * @return lista completa de pedidos en la base de datos
      * @throws Exception si hay fallo al ejecutar la consulta
      */
-    public List<Pedido> findAll() throws Exception {
+    public static ArrayList<Pedido> findAll() throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
-            List<Pedido> list = new ArrayList<>();
+            ArrayList<Pedido> list = new ArrayList<>();
             while (rs.next()) {
                 LocalDate fecha = rs.getDate("FechaInicio").toLocalDate();
                 EstadosPedido estado = mapEstado(rs.getString("Estado"));
                 list.add(new Pedido(
                         rs.getInt("ID_Pedido"),
-                        rs.getInt("ID_Cliente"),
                         fecha,
                         estado,
                         rs.getString("Comentario")
@@ -127,10 +124,10 @@ public class PedidoDAO {
      * @param p objeto Pedido con idCliente, fecha, estado y comentario definidos
      * @throws Exception si falla la inserción o la recuperación de la clave generada
      */
-    public void create(Pedido p) throws Exception {
+    public static void create(Pedido p) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, p.getIdCliente());
+            ps.setInt(1, p.getCliente().getIdUsuario());
             ps.setDate(2, Date.valueOf(p.getFechaPedido()));
             ps.setString(3, p.getEstado().name());
             ps.setString(4, p.getComentario());
@@ -150,14 +147,13 @@ public class PedidoDAO {
      * @param p objeto Pedido con los nuevos valores y su idPedido establecido
      * @throws Exception si ocurre un error durante la actualización
      */
-    public void update(Pedido p) throws Exception {
+    public static void update(Pedido p) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
-            ps.setInt(1, p.getIdCliente());
-            ps.setDate(2, Date.valueOf(p.getFechaPedido()));
-            ps.setString(3, p.getEstado().name());
-            ps.setString(4, p.getComentario());
-            ps.setInt(5, p.getIdPedido());
+            ps.setDate(1, Date.valueOf(p.getFechaPedido()));
+            ps.setString(2, p.getEstado().name());
+            ps.setString(3, p.getComentario());
+            ps.setInt(4, p.getIdPedido());
             ps.executeUpdate();
         }
     }
@@ -168,7 +164,7 @@ public class PedidoDAO {
      * @param id identificador del pedido que se desea borrar
      * @throws Exception si falla la eliminación en la base de datos
      */
-    public void delete(int id) throws Exception {
+    public static void delete(int id) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, id);

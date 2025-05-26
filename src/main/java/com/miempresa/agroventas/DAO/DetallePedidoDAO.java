@@ -2,6 +2,8 @@ package com.miempresa.agroventas.DAO;
 
 import com.miempresa.agroventas.baseDatos.ConnectionBD;
 import com.miempresa.agroventas.model.DetallePedido;
+import com.miempresa.agroventas.model.Maquinaria;
+import com.miempresa.agroventas.model.Pedido;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class DetallePedidoDAO {
      * @return objeto DetallePedido si existe, o null si no se encuentra
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public DetallePedido findById(int idPedido, int idMaquinaria) throws Exception {
+    public static DetallePedido findById(int idPedido, int idMaquinaria) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, idPedido);
@@ -43,7 +45,7 @@ public class DetallePedidoDAO {
      * @return lista de DetallePedido (vacía si no hay registros)
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public List<DetallePedido> findAll() throws Exception {
+    public static List<DetallePedido> findAll() throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
@@ -61,35 +63,49 @@ public class DetallePedidoDAO {
      * @return lista de DetallePedido asociada al pedido
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public List<DetallePedido> findByPedidoId(int idPedido) throws Exception {
+    public static List<DetallePedido> findByPedidoId(int idPedido, List<Maquinaria> maquinarias) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_BY_PEDIDO_ID)) {
             ps.setInt(1, idPedido);
             try (ResultSet rs = ps.executeQuery()) {
                 List<DetallePedido> list = new ArrayList<>();
                 while (rs.next()) {
-                    list.add(new DetallePedido(
-                            rs.getInt("ID_Pedido"),
-                            rs.getInt("ID_Maquinaria"),
+                    Pedido pedido = new Pedido();
+                    pedido.setIdPedido(rs.getInt("ID_Pedido"));
+
+                    int idMaquinaria = rs.getInt("ID_Maquinaria");
+
+                    // Buscar la maquinaria en la lista proporcionada
+                    Maquinaria maquinaria = maquinarias.stream()
+                            .filter(m -> m.getIdMaquinaria() == idMaquinaria)
+                            .findFirst()
+                            .orElse(null); // Evita null si no la encuentra
+
+                    DetallePedido dp = new DetallePedido(
+                            maquinaria,
+                            pedido,
                             rs.getInt("Cantidad"),
                             rs.getDouble("PrecioUnitario")
-                    ));
+                    );
+                    list.add(dp);
                 }
                 return list;
             }
         }
     }
 
+
+
     /**
      * Inserta un nuevo DetallePedido en la base de datos.
      * @param dp objeto DetallePedido con pedido, maquinaria, cantidad y precio unitario
      * @throws Exception si ocurre un error de inserción
      */
-    public void create(DetallePedido dp) throws Exception {
+    public static void create(DetallePedido dp) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_INSERT)) {
-            ps.setInt(1, dp.getIdPedido());
-            ps.setInt(2, dp.getIdMaquinaria());
+            ps.setInt(1, dp.getPedido().getIdPedido());
+            ps.setInt(2, dp.getMaquinaria().getIdMaquinaria());
             ps.setInt(3, dp.getCantidad());
             ps.setDouble(4, dp.getPrecioUnitario());
             ps.executeUpdate();
@@ -101,13 +117,13 @@ public class DetallePedidoDAO {
      * @param dp objeto DetallePedido con datos actualizados
      * @throws Exception si ocurre un error de actualización
      */
-    public void update(DetallePedido dp) throws Exception {
+    public static void update(DetallePedido dp) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
             ps.setInt(1, dp.getCantidad());
             ps.setDouble(2, dp.getPrecioUnitario());
-            ps.setInt(3, dp.getIdPedido());
-            ps.setInt(4, dp.getIdMaquinaria());
+            ps.setInt(3, dp.getPedido().getIdPedido());
+            ps.setInt(4, dp.getMaquinaria().getIdMaquinaria());
             ps.executeUpdate();
         }
     }
@@ -118,7 +134,7 @@ public class DetallePedidoDAO {
      * @param idMaquinaria identificador de la maquinaria
      * @throws Exception si ocurre un error de eliminación
      */
-    public void delete(int idPedido, int idMaquinaria) throws Exception {
+    public static void delete(int idPedido, int idMaquinaria) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, idPedido);
@@ -133,9 +149,19 @@ public class DetallePedidoDAO {
      * @return DetallePedido con los valores de la fila
      * @throws SQLException si ocurre un error al leer del ResultSet
      */
-    private DetallePedido mapRow(ResultSet rs) throws SQLException {
-        return new DetallePedido(rs.getInt("ID_Pedido"), rs.getInt("ID_Maquinaria"),
-                rs.getInt("Cantidad"), rs.getDouble("PrecioUnitario")
+    private static DetallePedido mapRow(ResultSet rs) throws SQLException {
+        // Crear objetos desde los IDs
+        Pedido pedido = new Pedido();
+        pedido.setIdPedido(rs.getInt("ID_Pedido"));
+
+        Maquinaria maquinaria = new Maquinaria();
+        maquinaria.setIdMaquinaria(rs.getInt("ID_Maquinaria"));
+
+        return new DetallePedido(
+                maquinaria,
+                pedido,
+                rs.getInt("Cantidad"),
+                rs.getDouble("PrecioUnitario")
         );
     }
 }

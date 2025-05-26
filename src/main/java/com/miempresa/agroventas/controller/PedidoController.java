@@ -1,6 +1,5 @@
 package com.miempresa.agroventas.controller;
-
-import com.miempresa.agroventas.DAO.PedidoDAO;
+import com.miempresa.agroventas.interfaces.Role;
 import com.miempresa.agroventas.model.Pedido;
 import com.miempresa.agroventas.util.Session;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -32,7 +31,6 @@ public class PedidoController {
     @FXML private TableColumn<Pedido,String> colEstado;
     @FXML private TableColumn<Pedido,String> colComentario;
 
-    private final PedidoDAO dao = new PedidoDAO();
     private boolean onlyMine = false;
     private Stage dialogStage;
 
@@ -76,6 +74,8 @@ public class PedidoController {
         colComentario.setCellValueFactory(p ->
                 new SimpleStringProperty(p.getValue().getComentario())
         );
+
+        cargarPedidos();
     }
 
     /**
@@ -84,9 +84,13 @@ public class PedidoController {
      */
     private void cargarPedidos() {
         try {
-            List<Pedido> lista = onlyMine
-                    ? dao.findByClienteId(Session.getUsuario().getIdUsuario())
-                    : dao.findAll();
+            List<Pedido> lista;
+
+            if(Session.getRole() == Role.CLIENTE){
+                lista = Session.getCurrentCliente().getPedidos();
+            }else {
+                lista = Session.getCurrentEmpleado().getPedidos();
+            }
             tablePedidos.getItems().setAll(lista);
         } catch (Exception e) {
             new Alert(
@@ -156,7 +160,11 @@ public class PedidoController {
         confirm.showAndWait().ifPresent(bt -> {
             if (bt == ButtonType.YES) {
                 try {
-                    dao.delete(sel.getIdPedido());
+                    if(Session.getRole() == Role.CLIENTE){
+                    Session.getCurrentCliente().eliminarPedido(sel);
+                    }else {
+                        Session.getCurrentEmpleado().eliminarPedido(sel);
+                    }
                     cargarPedidos();
                 } catch (Exception e) {
                     new Alert(
@@ -175,6 +183,7 @@ public class PedidoController {
      */
     @FXML
     private void onCambiarEstado() {
+
         Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
         if (sel == null) {
             new Alert(Alert.AlertType.WARNING,

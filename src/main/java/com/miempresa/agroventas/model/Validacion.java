@@ -3,32 +3,27 @@ package com.miempresa.agroventas.model;
 import java.time.LocalDateTime;
 
 public class Validacion {
-    private int idPedido;
-    private int idEmpleado;
+
     private LocalDateTime fechaValidacion;
     private String comentarioValidacion;
+    private Pedido pedido;
+    private Empleado empleado;
 
     public Validacion() {}
 
-    public Validacion(int idPedido, int idEmpleado, LocalDateTime fechaValidacion, String comentarioValidacion) {
-        this.idPedido            = idPedido;
-        this.idEmpleado          = idEmpleado;
-        this.fechaValidacion     = fechaValidacion;
+    public Validacion(LocalDateTime fechaValidacion, String comentarioValidacion, Pedido pedido, Empleado empleado) {
+        this.fechaValidacion = fechaValidacion;
         this.comentarioValidacion = comentarioValidacion;
+        this.pedido = pedido;
+        this.empleado = empleado;
     }
 
-    public int getIdPedido() {
-        return idPedido;
-    }
-    public void setIdPedido(int idPedido) {
-        this.idPedido = idPedido;
+    public Empleado getEmpleado() {
+        return empleado;
     }
 
-    public int getIdEmpleado() {
-        return idEmpleado;
-    }
-    public void setIdEmpleado(int idEmpleado) {
-        this.idEmpleado = idEmpleado;
+    public void setEmpleado(Empleado empleado) {
+        this.empleado = empleado;
     }
 
     public LocalDateTime getFechaValidacion() {
@@ -45,11 +40,19 @@ public class Validacion {
         this.comentarioValidacion = comentarioValidacion;
     }
 
+    public Pedido getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+    }
+
     @Override
     public String toString() {
         return "Validacion{" +
-                "idPedido=" + idPedido +
-                ", idEmpleado=" + idEmpleado +
+                "idPedido=" + pedido.getIdPedido() +
+                ", idEmpleado=" + empleado.getIdUsuario() +
                 ", fechaValidacion=" + fechaValidacion +
                 ", comentarioValidacion='" + comentarioValidacion + '\'' +
                 '}';

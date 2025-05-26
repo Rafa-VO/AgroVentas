@@ -26,7 +26,7 @@ public class EmpleadoDAO {
      * @return objeto Empleado si existe, o null si no se encuentra
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public Empleado findById(int id) throws Exception {
+    public static Empleado findById(int id) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, id);
@@ -41,7 +41,7 @@ public class EmpleadoDAO {
      * @return lista de Empleado, vacía si no hay registros
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public List<Empleado> findAll() throws Exception {
+    public static List<Empleado> findAll() throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
@@ -58,7 +58,7 @@ public class EmpleadoDAO {
      * @param e objeto Empleado con ID de usuario, departamento, cargo y salario
      * @throws Exception si ocurre un error durante la inserción
      */
-    public void create(Empleado e) throws Exception {
+    public static void create(Empleado e) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_INSERT)) {
             ps.setInt(1, e.getIdUsuario());
@@ -74,7 +74,7 @@ public class EmpleadoDAO {
      * @param e objeto Empleado que contiene los nuevos valores y el ID de usuario
      * @throws Exception si ocurre un error durante la actualización
      */
-    public void update(Empleado e) throws Exception {
+    public static void update(Empleado e) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
             ps.setString(1, e.getDepartamento());
@@ -90,7 +90,7 @@ public class EmpleadoDAO {
      * @param id identificador del usuario a eliminar
      * @throws Exception si ocurre un error durante la eliminación
      */
-    public void delete(int id) throws Exception {
+    public static void delete(int id) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, id);
@@ -104,7 +104,7 @@ public class EmpleadoDAO {
      * @return Empleado con los datos de la fila
      * @throws SQLException si ocurre un error al leer del ResultSet
      */
-    private Empleado mapRow(ResultSet rs) throws SQLException {
+    private static Empleado mapRow(ResultSet rs) throws SQLException {
         Empleado e = new Empleado();e.setIdUsuario   (rs.getInt   ("ID_Usuario"));
         e.setNombre      (rs.getString("Nombre"));
         e.setApellidos   (rs.getString("Apellidos"));

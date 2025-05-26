@@ -21,7 +21,7 @@ public class ProveedorDAO {
      * @return instancia de Proveedor si existe, o null si no se encuentra
      * @throws Exception en caso de error de acceso a la base de datos
      */
-    public Proveedor findById(int id) throws Exception {
+    public static Proveedor findById(int id) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, id);
@@ -36,7 +36,7 @@ public class ProveedorDAO {
      * @return lista de Proveedor, vacía si no hay registros
      * @throws Exception en caso de error de acceso a la base de datos
      */
-    public List<Proveedor> findAll() throws Exception {
+    public static List<Proveedor> findAll() throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
@@ -52,7 +52,7 @@ public class ProveedorDAO {
      * @param p objeto Proveedor con nombre, teléfono y email definidos
      * @throws Exception en caso de error durante la inserción
      */
-    public void create(Proveedor p) throws Exception {
+    public static void create(Proveedor p) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getNombre());
@@ -70,7 +70,7 @@ public class ProveedorDAO {
      * @param p objeto Proveedor con ID y nuevos valores de nombre, teléfono y email
      * @throws Exception en caso de error durante la actualización
      */
-    public void update(Proveedor p) throws Exception {
+    public static void update(Proveedor p) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_UPDATE)) {
             ps.setString(1, p.getNombre());
@@ -86,7 +86,7 @@ public class ProveedorDAO {
      * @param id identificador del proveedor a eliminar
      * @throws Exception en caso de error durante la eliminación
      */
-    public void delete(int id) throws Exception {
+    public static void delete(int id) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, id);
@@ -100,7 +100,7 @@ public class ProveedorDAO {
      * @return instancia de Proveedor con los campos cargados
      * @throws SQLException en caso de error al leer datos del ResultSet
      */
-    private Proveedor mapRow(ResultSet rs) throws SQLException {
+    private static Proveedor mapRow(ResultSet rs) throws SQLException {
         return new Proveedor(
                 rs.getInt("ID_Proveedor"),
                 rs.getString("Nombre"),

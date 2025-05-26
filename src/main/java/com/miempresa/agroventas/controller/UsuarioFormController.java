@@ -24,7 +24,6 @@ public class UsuarioFormController {
     private Usuario usuario;
     private boolean okClicked = false;
 
-    private final UsuarioDAO dao = new UsuarioDAO();
 
     /**
      * Guarda la referencia al Stage modal que contiene este formulario.
@@ -84,9 +83,9 @@ public class UsuarioFormController {
         usuario.setContrasena(tfContrasena.getText());
         try {
             if (usuario.getIdUsuario() == 0) {
-                dao.create(usuario);
+                UsuarioDAO.create(usuario);
             } else {
-                dao.update(usuario);
+                UsuarioDAO.update(usuario);
             }
             okClicked = true;
             dialogStage.close();

@@ -4,6 +4,7 @@ import com.miempresa.agroventas.DAO.DetallePedidoDAO;
 import com.miempresa.agroventas.DAO.MaquinariaDAO;
 import com.miempresa.agroventas.DAO.PedidoDAO;
 import com.miempresa.agroventas.interfaces.EstadosPedido;
+import com.miempresa.agroventas.model.Cliente;
 import com.miempresa.agroventas.model.DetallePedido;
 import com.miempresa.agroventas.model.Maquinaria;
 import com.miempresa.agroventas.model.Pedido;
@@ -45,10 +46,6 @@ public class PedidoFormController {
     @FXML private Button btnGuardar;
     @FXML private Button btnCancelar;
 
-    private final PedidoDAO pedidoDAO     = new PedidoDAO();
-    private final DetallePedidoDAO detalleDAO    = new DetallePedidoDAO();
-    private final MaquinariaDAO maquinariaDAO = new MaquinariaDAO();
-
     private Stage dialogStage;
     private boolean okClicked = false;
     private final ObservableList<DetallePedido> lineas = FXCollections.observableArrayList();
@@ -68,7 +65,7 @@ public class PedidoFormController {
 
         colNombre.setCellValueFactory(cd -> {
             try {
-                Maquinaria m = maquinariaDAO.findById(cd.getValue().getIdMaquinaria());
+                Maquinaria m = cd.getValue().getMaquinaria();
                 return new SimpleStringProperty(m.getNombre());
             } catch (Exception e) {
                 return new SimpleStringProperty("");
@@ -76,7 +73,7 @@ public class PedidoFormController {
         });
         colTipo.setCellValueFactory(cd -> {
             try {
-                Maquinaria m = maquinariaDAO.findById(cd.getValue().getIdMaquinaria());
+                Maquinaria m = cd.getValue().getMaquinaria();
                 return new SimpleStringProperty(m.getTipo());
             } catch (Exception e) {
                 return new SimpleStringProperty("");
@@ -84,7 +81,7 @@ public class PedidoFormController {
         });
         colDescripcion.setCellValueFactory(cd -> {
             try {
-                Maquinaria m = maquinariaDAO.findById(cd.getValue().getIdMaquinaria());
+                Maquinaria m = cd.getValue().getMaquinaria();
                 return new SimpleStringProperty(m.getDescripcion());
             } catch (Exception e) {
                 return new SimpleStringProperty("");
@@ -121,7 +118,7 @@ public class PedidoFormController {
 
         try {
             cbMaquinaria.setItems(
-                    FXCollections.observableArrayList(maquinariaDAO.findAll())
+                    FXCollections.observableArrayList(MaquinariaDAO.findAll())
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -161,7 +158,7 @@ public class PedidoFormController {
         if (m == null || qty <= 0) return;
 
         DetallePedido existente = lineas.stream()
-                .filter(dp -> dp.getIdMaquinaria() == m.getIdMaquinaria())
+                .filter(dp -> dp.getMaquinaria().getIdMaquinaria() == m.getIdMaquinaria())
                 .findFirst()
                 .orElse(null);
 
@@ -170,7 +167,7 @@ public class PedidoFormController {
             tvLineas.refresh();
         } else {
             DetallePedido dp = new DetallePedido();
-            dp.setIdMaquinaria(m.getIdMaquinaria());
+            dp.setMaquinaria(m);
             dp.setCantidad(qty);
             dp.setPrecioUnitario(m.getPrecio());
             lineas.add(dp);
@@ -202,16 +199,21 @@ public class PedidoFormController {
     @FXML
     private void onGuardar() {
         try {
+            Cliente cliente = Session.getCurrentCliente();
+
             Pedido p = new Pedido();
-            p.setIdCliente(Session.getUsuario().getIdUsuario());
+
             p.setFechaPedido(dpFecha.getValue());
             p.setEstado(EstadosPedido.PENDIENTE);
             p.setComentario(taComentario.getText());
-            pedidoDAO.create(p);
+
+            p.setCliente(cliente);
+
+            cliente.anadirPedido(p);
 
             for (DetallePedido dp : lineas) {
-                dp.setIdPedido(p.getIdPedido());
-                detalleDAO.create(dp);
+                dp.setPedido(p);
+                DetallePedidoDAO.create(dp);
             }
 
             okClicked = true;
@@ -242,8 +244,12 @@ public class PedidoFormController {
         taComentario.setText(pedido.getComentario());
 
         try {
-            List<DetallePedido> detalles =
-                    detalleDAO.findByPedidoId(pedido.getIdPedido());
+            // Cargar todas las maquinarias una vez
+            List<Maquinaria> todasLasMaquinarias = MaquinariaDAO.findAll();
+
+            // Pasarlas al método que ahora necesita esa lista
+            List<DetallePedido> detalles = DetallePedidoDAO.findByPedidoId(pedido.getIdPedido(), todasLasMaquinarias);
+
             lineas.clear();
             lineas.addAll(detalles);
         } catch (Exception e) {
@@ -261,6 +267,7 @@ public class PedidoFormController {
         btnGuardar.setDisable(true);
         btnCancelar.setDisable(true);
     }
+
 
     /**
      * Recalcula la suma de todos los subtotales de las líneas

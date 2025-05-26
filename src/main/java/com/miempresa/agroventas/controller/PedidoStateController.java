@@ -3,6 +3,7 @@ package com.miempresa.agroventas.controller;
 import com.miempresa.agroventas.DAO.PedidoDAO;
 import com.miempresa.agroventas.DAO.ValidacionDAO;
 import com.miempresa.agroventas.interfaces.EstadosPedido;
+import com.miempresa.agroventas.model.Empleado;
 import com.miempresa.agroventas.model.Pedido;
 import com.miempresa.agroventas.model.Validacion;
 import com.miempresa.agroventas.util.Session;
@@ -26,11 +27,8 @@ public class PedidoStateController {
     @FXML private Label lblFecha;
     @FXML private ComboBox<String> cbEstado;
     @FXML private TextArea taComentario;
-    @FXML private Button btnGuardar;
-    @FXML private Button btnCancelar;
 
-    private final PedidoDAO pedidoDAO = new PedidoDAO();
-    private final ValidacionDAO validacionDAO = new ValidacionDAO();
+
     private Pedido pedido;
     private Validacion validacion;
     private Stage dialogStage;
@@ -47,6 +45,7 @@ public class PedidoStateController {
                 EstadosPedido.ENTREGADO.name(),
                 EstadosPedido.CANCELADO.name()
         );
+
     }
 
     /**
@@ -73,7 +72,7 @@ public class PedidoStateController {
         cbEstado.setValue(p.getEstado().name());
 
         try {
-            validacion = validacionDAO.findById(
+            validacion = ValidacionDAO.findById(
                     Session.getUsuario().getIdUsuario(),
                     p.getIdPedido()
             );
@@ -96,20 +95,36 @@ public class PedidoStateController {
         try {
             EstadosPedido nuevoEstado = EstadosPedido.valueOf(cbEstado.getValue());
             pedido.setEstado(nuevoEstado);
-            pedidoDAO.update(pedido);
+            Session.getCurrentEmpleado().actualizarPedido(pedido);
 
             LocalDateTime ahora = LocalDateTime.now();
+
+            // 💡 Paso 2: consultar si ya existe una validación en la base de datos
             if (validacion == null) {
+                validacion = ValidacionDAO.findByPedidoId(pedido.getIdPedido());
+            }
+
+            if (validacion == null) {
+                // No existía → crear nueva
                 validacion = new Validacion();
-                validacion.setIdPedido(pedido.getIdPedido());
-                validacion.setIdEmpleado(Session.getUsuario().getIdUsuario());
+
+                Pedido p = new Pedido();
+                p.setIdPedido(pedido.getIdPedido());
+                validacion.setPedido(p);
+
+                Empleado e = new Empleado();
+                e.setIdUsuario(Session.getUsuario().getIdUsuario());
+                validacion.setEmpleado(e);
+
                 validacion.setFechaValidacion(ahora);
                 validacion.setComentarioValidacion(taComentario.getText());
-                validacionDAO.create(validacion);
+
+                ValidacionDAO.create(validacion);
             } else {
+                // Ya existía → actualizar
                 validacion.setFechaValidacion(ahora);
                 validacion.setComentarioValidacion(taComentario.getText());
-                validacionDAO.update(validacion);
+                ValidacionDAO.update(validacion);
             }
 
             dialogStage.close();
@@ -119,6 +134,8 @@ public class PedidoStateController {
             ).showAndWait();
         }
     }
+
+
 
     /**
      * Cierra el diálogo sin guardar cambios cuando el usuario pulsa el botón Cancelar.

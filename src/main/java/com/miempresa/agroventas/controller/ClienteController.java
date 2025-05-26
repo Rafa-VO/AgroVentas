@@ -2,7 +2,9 @@ package com.miempresa.agroventas.controller;
 
 import com.miempresa.agroventas.DAO.ClienteDAO;
 import com.miempresa.agroventas.model.Cliente;
+import com.miempresa.agroventas.model.Empleado;
 import com.miempresa.agroventas.model.Usuario;
+import com.miempresa.agroventas.util.Session;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -21,8 +23,6 @@ public class ClienteController {
     @FXML private TableColumn<Cliente,String>  colCorreo;
     @FXML private TableColumn<Cliente,String>  colDireccion;
     @FXML private TableColumn<Cliente,String>  colTelefono;
-
-    private final ClienteDAO dao = new ClienteDAO();
 
     /**
      * Inicializa las columnas de la tabla y carga la lista de clientes.
@@ -45,7 +45,7 @@ public class ClienteController {
      */
     private void loadClientes() {
         try {
-            var list = dao.findAll();
+            var list = Session.getCurrentEmpleado().getClientes();
             tablaClientes.setItems(FXCollections.observableArrayList(list));
         } catch(Exception e) {
             showError("No se pudieron cargar clientes", e.getMessage());
@@ -163,7 +163,7 @@ public class ClienteController {
             return;
         }
         try {
-            dao.delete(sel.getIdUsuario());
+            Session.getCurrentEmpleado().eliminarCliente(sel);
             loadClientes();
         } catch(Exception e) {
             showError("No se pudo eliminar", e.getMessage());

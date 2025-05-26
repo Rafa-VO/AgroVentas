@@ -1,25 +1,36 @@
 package com.miempresa.agroventas.model;
 
 public class DetallePedido {
-    private int idPedido;
-    private int idMaquinaria;
     private int cantidad;
     private double precioUnitario;
+    private Pedido pedido;
+    private Maquinaria maquinaria;
 
-    public DetallePedido() {}
-
-    public DetallePedido(int idPedido, int idMaquinaria, int cantidad, double precioUnitario) {
-        this.idPedido = idPedido;
-        this.idMaquinaria = idMaquinaria;
-        this.cantidad = cantidad;
-        this.precioUnitario = precioUnitario;
+    public DetallePedido() {
     }
 
-    public int getIdPedido() { return idPedido; }
-    public void setIdPedido(int idPedido) { this.idPedido = idPedido; }
+    public DetallePedido(Maquinaria maquinaria, Pedido pedido, int cantidad, double precioUnitario) {
+        this.cantidad = cantidad;
+        this.precioUnitario = precioUnitario;
+        this.pedido = pedido;
+        this.maquinaria = maquinaria;
+    }
 
-    public int getIdMaquinaria() { return idMaquinaria; }
-    public void setIdMaquinaria(int idMaquinaria) { this.idMaquinaria = idMaquinaria; }
+    public Pedido getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
+    }
+
+    public Maquinaria getMaquinaria() {
+        return maquinaria;
+    }
+
+    public void setMaquinaria(Maquinaria maquinaria) {
+        this.maquinaria = maquinaria;
+    }
 
     public int getCantidad() { return cantidad; }
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
@@ -30,8 +41,8 @@ public class DetallePedido {
     @Override
     public String toString() {
         return "DetallePedido{" +
-                "idPedido=" + idPedido +
-                ", idMaquinaria=" + idMaquinaria +
+                "idPedido = " + getPedido().getIdPedido() +
+                ", idMaquinaria = " + getMaquinaria().getIdMaquinaria() +
                 ", cantidad=" + cantidad +
                 ", precioUnitario=" + precioUnitario +
                 '}';

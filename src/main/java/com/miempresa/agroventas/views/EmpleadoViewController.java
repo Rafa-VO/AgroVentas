@@ -49,7 +49,7 @@ public class EmpleadoViewController {
             dlg.initModality(Modality.APPLICATION_MODAL);
             dlg.setTitle("Gestión de Maquinaria");
             dlg.setScene(new Scene(root));
-            dlg.showAndWait();
+            dlg.show();
         } catch (Exception e) {
             e.printStackTrace();
         }

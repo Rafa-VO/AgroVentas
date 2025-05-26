@@ -4,6 +4,7 @@ import com.miempresa.agroventas.DAO.ClienteDAO;
 import com.miempresa.agroventas.DAO.UsuarioDAO;
 import com.miempresa.agroventas.model.Cliente;
 import com.miempresa.agroventas.model.Usuario;
+import com.miempresa.agroventas.util.Session;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -27,9 +28,6 @@ public class ClienteFormController {
     private Cliente cliente;
     private boolean okClicked = false;
 
-    private final ClienteDAO clienteDAO = new ClienteDAO();
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
-
     /**
      * Establece el Stage del diálogo, necesario para posicionar las alertas
      * de error como hijos de esta ventana modal.
@@ -50,7 +48,7 @@ public class ClienteFormController {
         if (c.getIdUsuario() != 0) {
             // Modo edición: precarga usuario, dirección y teléfono
             try {
-                Usuario u = usuarioDAO.findById(c.getIdUsuario());
+                Usuario u = UsuarioDAO.findById(c.getIdUsuario());
                 cbUsuario.getSelectionModel().select(u);
             } catch (Exception e) {
                 throw new RuntimeException("No se pudo cargar el usuario para edición", e);
@@ -73,9 +71,9 @@ public class ClienteFormController {
     public void initialize() {
         try {
             // 1) Lee todos los usuarios
-            var usuarios = usuarioDAO.findAll();
+            var usuarios = UsuarioDAO.findAll();
             // 2) IDs de los usuarios que ya tienen cliente
-            Set<Integer> idsClientes = clienteDAO.findAll().stream()
+            Set<Integer> idsClientes = ClienteDAO.findAll().stream()
                     .map(Cliente::getIdUsuario)
                     .collect(Collectors.toSet());
             // 3) Filtrar usuarios ya asignados
@@ -101,10 +99,7 @@ public class ClienteFormController {
                     if (empty || u == null) {
                         setText(null);
                     } else {
-                        setText(String.format(
-                                "[%d] %s %s — %s",
-                                u.getIdUsuario(), u.getNombre(), u.getApellidos(), u.getCorreo()
-                        ));
+                        setText(String.format("[%d] %s %s — %s", u.getIdUsuario(), u.getNombre(), u.getApellidos(), u.getCorreo()));
                     }
                 }
             });
@@ -150,10 +145,11 @@ public class ClienteFormController {
 
         try {
             // Si no existe, crea; si existe, actualiza
-            if (clienteDAO.findById(cliente.getIdUsuario()) == null) {
-                clienteDAO.create(cliente);
+            if (Session.getCurrentCliente() == null && Session.getCurrentEmpleado() == null) {
+                ClienteDAO.create(cliente);
             } else {
-                clienteDAO.update(cliente);
+
+                Session.getCurrentEmpleado().actualizarCliente(cliente);
             }
             okClicked = true;
             dialogStage.close();

@@ -26,9 +26,6 @@ public class EmpleadoFormController {
     private Empleado empleado;
     private boolean okClicked = false;
 
-    private final EmpleadoDAO empleadoDAO = new EmpleadoDAO();
-    private final UsuarioDAO usuarioDAO   = new UsuarioDAO();
-
     /**
      * Inicializa el formulario con el Stage modal y el Empleado a crear o editar.
      *1) Carga y filtra los usuarios disponibles (no asignados a otro Empleado, o el propio si estamos editando).
@@ -43,12 +40,12 @@ public class EmpleadoFormController {
 
         // 1) Carga y filtra usuarios
         try {
-            var todos = usuarioDAO.findAll();
+            var todos = UsuarioDAO.findAll();
             var pendientes = todos.stream()
                     // Solo los usuarios sin empleado o el mismo si editamos
                     .filter(u -> {
                         try {
-                            boolean yaAsociado = empleadoDAO.findById(u.getIdUsuario()) != null;
+                            boolean yaAsociado = EmpleadoDAO.findById(u.getIdUsuario()) != null;
                             return !yaAsociado || u.getIdUsuario() == e.getIdUsuario();
                         } catch (Exception ex) {
                             return false;
@@ -88,7 +85,7 @@ public class EmpleadoFormController {
         // 3) Si es edición, preselecciona Usuario y rellena campos del Empleado
         if (e.getIdUsuario() != 0) {
             try {
-                var seleccionado = usuarioDAO.findById(e.getIdUsuario());
+                var seleccionado = UsuarioDAO.findById(e.getIdUsuario());
                 cbUsuario.getSelectionModel().select(seleccionado);
             } catch (Exception ex) {
                 throw new RuntimeException("No pude precargar el usuario seleccionado", ex);
@@ -132,10 +129,10 @@ public class EmpleadoFormController {
             empleado.setSalario(Double.parseDouble(tfSalario.getText()));
 
             // Si no existe, crear; si existe, actualizar
-            if (empleadoDAO.findById(empleado.getIdUsuario()) == null) {
-                empleadoDAO.create(empleado);
+            if (EmpleadoDAO.findById(empleado.getIdUsuario()) == null) {
+                EmpleadoDAO.create(empleado);
             } else {
-                empleadoDAO.update(empleado);
+                EmpleadoDAO.update(empleado);
             }
 
             okClicked = true;

@@ -23,7 +23,7 @@ public class UsuarioDAO {
      * @return objeto Usuario si existe, o null en caso contrario
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public Usuario findById(int id) throws Exception {
+    public static Usuario findById(int id) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, id);
@@ -39,7 +39,7 @@ public class UsuarioDAO {
      * @return objeto Usuario si se encuentra uno con ese correo, o null si no existe
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public Usuario findByEmail(String correo) throws Exception {
+    public static Usuario findByEmail(String correo) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_EMAIL)) {
             ps.setString(1, correo);
@@ -54,7 +54,7 @@ public class UsuarioDAO {
      * @return lista de todos los objetos Usuario en la base de datos
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public List<Usuario> findAll() throws Exception {
+    public static List<Usuario> findAll() throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
@@ -72,7 +72,7 @@ public class UsuarioDAO {
      * @param u objeto Usuario a crear (sin ID)
      * @throws Exception si ocurre un error durante la inserción
      */
-    public void create(Usuario u) throws Exception {
+    public static void create(Usuario u) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, u.getNombre());
@@ -93,7 +93,7 @@ public class UsuarioDAO {
      * @param u objeto Usuario con ID y nuevos valores de nombre, apellidos, correo y contraseña
      * @throws Exception si ocurre un error durante la actualización
      */
-    public void update(Usuario u) throws Exception {
+    public static void update(Usuario u) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_UPDATE)) {
             ps.setString(1, u.getNombre());
@@ -110,7 +110,7 @@ public class UsuarioDAO {
      * @param id el ID del usuario a eliminar
      * @throws Exception si ocurre un error durante la eliminación
      */
-    public void delete(int id) throws Exception {
+    public static void delete(int id) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, id);
@@ -125,7 +125,7 @@ public class UsuarioDAO {
      * @return objeto Usuario si las credenciales coinciden, o null si no
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public Usuario findByEmailAndPassword(String correo, String contrasena) throws Exception {
+    public static Usuario findByEmailAndPassword(String correo, String contrasena) throws Exception {
         try (Connection c = ConnectionBD.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_FIND_BY_EMAIL_AND_PWD)) {
             ps.setString(1, correo);
@@ -142,7 +142,7 @@ public class UsuarioDAO {
      * @return instancia de Usuario con los campos cargados
      * @throws SQLException si ocurre un error al obtener los valores del ResultSet
      */
-    private Usuario mapRow(ResultSet rs) throws SQLException {
+    private static Usuario mapRow(ResultSet rs) throws SQLException {
         Usuario u = new Usuario();
         u.setIdUsuario  (rs.getInt   ("ID_Usuario"));
         u.setNombre     (rs.getString("Nombre"));

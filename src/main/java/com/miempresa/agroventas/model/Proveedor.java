@@ -1,10 +1,13 @@
 package com.miempresa.agroventas.model;
 
+import java.util.List;
+
 public class Proveedor {
     private int idProveedor;
     private String nombre;
     private String telefono;
     private String email;
+    private List <Maquinaria> maquinaria;
 
     public Proveedor() { }
 
@@ -41,6 +44,14 @@ public class Proveedor {
     }
     public void setEmail(String e) {
         this.email = e;
+    }
+
+    public List<Maquinaria> getMaquinaria() {
+        return maquinaria;
+    }
+
+    public void setMaquinaria(List<Maquinaria> maquinaria) {
+        this.maquinaria = maquinaria;
     }
 
     @Override

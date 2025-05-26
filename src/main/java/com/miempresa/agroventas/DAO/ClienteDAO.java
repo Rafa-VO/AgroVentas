@@ -13,27 +13,11 @@ import java.util.List;
  */
 public class ClienteDAO {
 
-    private static final String SQL_FIND_BY_ID =
-            "SELECT u.ID_Usuario, u.Nombre, u.Apellidos, u.Correo, " +
-                    "       c.Direccion, c.Telefono " +
-                    "FROM usuario u " +
-                    "JOIN cliente c ON u.ID_Usuario = c.ID_Usuario " +
-                    "WHERE u.ID_Usuario = ?";
-
-    private static final String SQL_FIND_ALL =
-            "SELECT u.ID_Usuario, u.Nombre, u.Apellidos, u.Correo, " +
-                    "       c.Direccion, c.Telefono " +
-                    "FROM usuario u " +
-                    "JOIN cliente c ON u.ID_Usuario = c.ID_Usuario";
-
-    private static final String SQL_INSERT =
-            "INSERT INTO cliente (ID_Usuario, Direccion, Telefono) VALUES (?, ?, ?)";
-
-    private static final String SQL_UPDATE =
-            "UPDATE cliente SET Direccion = ?, Telefono = ? WHERE ID_Usuario = ?";
-
-    private static final String SQL_DELETE =
-            "DELETE FROM cliente WHERE ID_Usuario = ?";
+    private static final String SQL_FIND_BY_ID = "SELECT u.ID_Usuario, u.Nombre, u.Apellidos, u.Correo, " + "       c.Direccion, c.Telefono " + "FROM usuario u " + "JOIN cliente c ON u.ID_Usuario = c.ID_Usuario " + "WHERE u.ID_Usuario = ?";
+    private static final String SQL_FIND_ALL = "SELECT u.ID_Usuario, u.Nombre, u.Apellidos, u.Correo, " + "       c.Direccion, c.Telefono " + "FROM usuario u " + "JOIN cliente c ON u.ID_Usuario = c.ID_Usuario";
+    private static final String SQL_INSERT = "INSERT INTO cliente (ID_Usuario, Direccion, Telefono) VALUES (?, ?, ?)";
+    private static final String SQL_UPDATE = "UPDATE cliente SET Direccion = ?, Telefono = ? WHERE ID_Usuario = ?";
+    private static final String SQL_DELETE = "DELETE FROM cliente WHERE ID_Usuario = ?";
 
     /**
      * Busca un Cliente por su identificador de usuario.
@@ -41,7 +25,7 @@ public class ClienteDAO {
      * @return objeto Cliente con los datos si existe, o null si no se encuentra
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public Cliente findById(int id) throws Exception {
+    public static Cliente findById(int id) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_BY_ID)) {
             ps.setInt(1, id);
@@ -56,7 +40,7 @@ public class ClienteDAO {
      * @return lista de objetos Cliente (vacía si no hay registros)
      * @throws Exception si ocurre un error de acceso a la base de datos
      */
-    public List<Cliente> findAll() throws Exception {
+    public static List<Cliente> findAll() throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_FIND_ALL);
              ResultSet rs = ps.executeQuery()) {
@@ -73,7 +57,7 @@ public class ClienteDAO {
      * @param cl objeto Cliente que contiene el ID de usuario, dirección y teléfono
      * @throws Exception si ocurre un error de inserción en la base de datos
      */
-    public void create(Cliente cl) throws Exception {
+    public static void create(Cliente cl) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_INSERT)) {
             ps.setInt(1, cl.getIdUsuario());
@@ -88,7 +72,7 @@ public class ClienteDAO {
      * @param cl objeto Cliente que contiene el ID de usuario y los nuevos valores
      * @throws Exception si ocurre un error de actualización en la base de datos
      */
-    public void update(Cliente cl) throws Exception {
+    public static void update(Cliente cl) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
             ps.setString(1, cl.getDireccion());
@@ -103,7 +87,7 @@ public class ClienteDAO {
      * @param id identificador del usuario a eliminar como cliente
      * @throws Exception si ocurre un error de eliminación en la base de datos
      */
-    public void delete(int id) throws Exception {
+    public static void delete(int id) throws Exception {
         try (Connection conn = ConnectionBD.getConnection();
              PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
             ps.setInt(1, id);
@@ -117,7 +101,7 @@ public class ClienteDAO {
      * @return instancia de Cliente con todos los campos cargados
      * @throws SQLException si ocurre un error al leer columnas del ResultSet
      */
-    private Cliente mapRow(ResultSet rs) throws SQLException {
+    private static Cliente mapRow(ResultSet rs) throws SQLException {
         Cliente c = new Cliente();
         c.setIdUsuario (rs.getInt   ("ID_Usuario"));
         c.setNombre    (rs.getString("Nombre"));

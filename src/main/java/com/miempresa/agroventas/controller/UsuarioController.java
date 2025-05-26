@@ -25,8 +25,6 @@ public class UsuarioController {
     @FXML private TableColumn<Usuario,String>  colNombre;
     @FXML private TableColumn<Usuario,String>  colCorreo;
 
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO();
-
     /**
      * Inicializa las columnas de la tabla vinculando cada columna
      * con la propiedad correspondiente del modelo Usuario. A continuación
@@ -46,7 +44,7 @@ public class UsuarioController {
      */
     private void loadUsuarios() {
         try {
-            var list = usuarioDAO.findAll();
+            var list = UsuarioDAO.findAll();
             tablaUsuarios.setItems(FXCollections.observableArrayList(list));
         } catch (Exception e) {
             showError("Error al cargar usuarios", e.getMessage());
@@ -95,7 +93,7 @@ public class UsuarioController {
             return;
         }
         try {
-            usuarioDAO.delete(sel.getIdUsuario());
+            UsuarioDAO.delete(sel.getIdUsuario());
             loadUsuarios();
         } catch (Exception e) {
             showError("Error al eliminar usuario", e.getMessage());
